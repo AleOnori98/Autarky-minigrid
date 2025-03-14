@@ -13,6 +13,6 @@ Outage durations.
 Autarky also provides insights into the system’s technical performance, costs, and operational environmental impact.
 
 
-Autarky was developed at Norwegian University of Science and Technology (NTNU) and HUmboldt University of Berlin as a tool for investigating ways to support rural electrification and the decentralization of electricity in urban communities. Since its continuous development began in 2022, Autarky has been used for planning studies in Sub-Saharan Africa, Germany, and Norway.
+Autarky was developed at Norwegian University of Science and Technology (NTNU) and Humboldt University of Berlin as a tool for investigating ways to support rural electrification and the decentralization of electricity in urban communities. Since its continuous development began in 2022, Autarky has been used for planning studies in Sub-Saharan Africa, Germany, and Norway.
 
 For more information, get in contact with tatiana.grandon@ntnu.no or alessandro.onori@ntnu.no or nesrine.ouanes@hu-berlin.de. 
