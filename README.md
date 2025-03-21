@@ -1,5 +1,5 @@
 # Autarky-minigrid
-Optimal Sizing and Dispatch for off-grid and weakly-connected mini-grids to support rural electrification. 
+Open-Source Optimal Sizing and Dispatch for off-grid and weakly-connected mini-grids to support rural electrification. 
 
 Autarky is a software tool designed to optimize community-scale electricity systems, typically mini-grids. It enables users to forecast electricity demand and renewable energy supply at specific GPS locations with an hourly resolution. There are four models available:
 1. The regular model, which does not account for uncertainties.
