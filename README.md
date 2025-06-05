@@ -32,7 +32,7 @@ Autarky is built as a modular full-stack application:
 
 - [Landing Page](https://autarky-energy.net): Overview, access to modeling tools.
 - [Modeling App](https://app.autarky-energy.net): Interactive frontend to configure and run models.
-- [Backend Repo](https://github.com/tatisgg/Autarky-minigrid/tree/backend): Julia-based core model and API logic.
+- [Backend Repo](hhttps://github.com/tatisgg/Autarky-minigrid/tree/main/backend): Julia-based core model and API logic.
 
 ---
 
@@ -62,7 +62,7 @@ In addition to the main web app, Autarky provides a **Streamlit-based desktop vi
 - Explore sizing, dispatch, cost, and performance results
 - Compare two projects side by side
 
-See the [`Autarky Streamlit App`](https://github.com/tatisgg/Autarky-minigrid/tree/main/Autarky%20App) for usage instructions.
+See the [`Autarky Streamlit App`](https://github.com/tatisgg/Autarky-minigrid/tree/main/backend/Autarky%20App) for usage instructions.
 
 ---
 
