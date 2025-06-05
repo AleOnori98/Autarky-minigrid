@@ -1,6 +1,6 @@
 # Autarky: Web-Based Energy System Modeling Platform
 
-**Autarky** is a full-stack open-source platform for **modeling, designing, and optimizing decentralized energy systems** such as mini-grids and swarm-grids. It empowers users—from engineers and researchers to policymakers and electrification agencies—to run advanced energy system optimization models via an intuitive, guided web interface.
+**Autarky** is a full-stack open-source platform for **modeling, designing, and optimizing decentralized energy systems** such as mini-grids and swarm-grids. It empowers users, from engineers and researchers to policymakers and electrification agencies, to run advanced energy system optimization models via an intuitive, guided web interface.
 
 ---
 
