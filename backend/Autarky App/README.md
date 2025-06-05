@@ -1,95 +1,87 @@
-# MiniGrid Optimization Model
+# Autarky Streamlit App
 
-## Overview
-The **MiniGrid Optimization Model** is a **Linear and Deterministic Optimization model** implemented in **JuMP**. It is designed for the **optimal sizing and operation of hybrid renewable energy systems**, determining the best configuration of **solar PV, wind turbines, batteries, backup generators, and grid interaction** to meet energy demand at the **lowest Net Present Cost (NPC)**.
+Welcome to the **Autarky Project Viewer** , a user-friendly web application built with **Streamlit** to explore, visualize, and compare results from **Autarky's mini-grid optimization models**.
 
-### **Objective Function: Cost Minimization**
-The model aims to **minimize the Net Present Cost (NPC)** of the system over its lifetime by optimizing **capital investment, operational expenses, replacement costs, and salvage value**, while ensuring that **demand is met** and operational constraints are satisfied. The objective function is:
-
-\[
-\min \text{NPC} = (\text{CAPEX} - \text{Subsidies}) + \text{Replacement Cost} + \text{OPEX} - \text{Salvage Value}
-\]
-
-where:
-- **CAPEX (Capital Expenditure):** Initial investment cost for system components.
-- **Subsidies:** Government or institutional financial support for renewable energy investments.
-- **Replacement Cost:** Discounted cost of replacing batteries, inverters, or other components over the project lifetime.
-- **OPEX (Operating Expenses):** Fixed and variable costs of system operation, including maintenance, fuel costs, and grid electricity costs.
-- **Salvage Value:** The residual value of assets at the end of the project lifetime, discounted to present value.
-
-### **Techno-Economic Analysis with Discounting**
-The model incorporates a **discounted cash flow analysis**, ensuring a realistic economic assessment over the **project lifetime** by considering **the time value of money**.
-
-- The **discount factor** for year \( y \) is given by:
-
-  \[
-  DF_y = \frac{1}{(1 + r)^y}
-  \]
-
-  where:
-  - \( r \) is the **discount rate** (e.g., 10% per year).
-  - \( y \) represents the year in the **project lifetime** (e.g., 20 years).
-
-By applying these **discounting techniques**, the model provides a **realistic evaluation of long-term costs and economic feasibility** for hybrid renewable energy systems.
+Autarky is an energy modeling framework that optimizes the **sizing and operation** of decentralized, often weakly connected or off-grid hybrid energy systems. This app brings its powerful backend models to life with interactive dashboards and charts.
 
 ---
 
-## Mathematical Formulation
+## 🚀 Features Overview
 
-### **Decision Variables**
-- **Sizing Variables**: Number of solar PV units, wind turbines, battery units, and generators.
-- **Operational Variables**:
-  - Renewable energy generation (solar, wind).
-  - Battery charging/discharging and state of charge (SOC).
-  - Generator production.
-  - Grid import/export.
-  - Unmet demand (lost load).
+### What You Can Do
 
-### **Constraints**
-- **Energy Balance**:  
-  \[
-  \text{Load}(t) = \text{Solar}(t) + \text{Wind}(t) + \text{Battery Discharge}(t) + \text{Generator}(t) + \text{Grid Import}(t) - \text{Grid Export}(t) - \text{Lost Load}(t)
-  \]
-- **Technology-Specific Constraints**:
-  - Maximum generation limits.
-  - Battery SOC dynamics.
-  - Generator fuel consumption and efficiency.
-- **Economic Constraints**:
-  - Maximum capital expenditure (CAPEX).
-  - Minimum renewable energy penetration.
-  - Discounted cash flow for lifetime costs.
+- **Visualize project inputs** such as load profiles, renewable production, techno-economic parameters, constraints, and forecast errors.
+- **Explore optimization results**, including system sizing, dispatch strategies, cost breakdowns, and reliability metrics.
+- **Compare multiple projects side by side** to evaluate trade-offs across technologies, costs, and model assumptions.
 
 ---
 
-## **Model Inputs & Files**
+## Page Navigation
 
-### **1. Input Data** (Located in `/inputs/` folder)
-- **Time-Series Data** (`.csv` files):
-  - Solar unit of production (retrievable from PVGIS if enabled).
-  - Wind unit of production (retrievable from PVGIS if enabled).
-  - Wind Power Curve related to the Wind Turbine selected.
-  - Load demand profile.
-  - Grid cost for import (optional).
-  - Grid prices for export (optional).
-- **YAML Parameter File** (`parameters.yaml`):
-  - Defines project settings (location, project lifetime, discount rate etc.)
-  - Defines project constraints (e.g., max CAPEX, min renewable share).
-  - Defines techno-economic parameters of each technology.
-  - Specifies solver settings (Gurobi, HiGHS, GLPK, etc.).
-  
+### 🏠 Home
+Introduces Autarky's purpose and the four model types:
+- **Deterministic**: Perfect foresight, baseline model.
+- **Expected Value**: Penalizes expected forecasting errors.
+- **Individual Chance Constraints (ICC)**: Adds per-timestep reliability.
+- **Joint Chance Constraints (JCC)**: Enforces reliability over outage windows.
+
 ---
 
-## **Installation & Setup**
+### 📂 Visualize Inputs
 
-### **1. Install Julia**
-Download and install **Julia** from [https://julialang.org/downloads/](https://julialang.org/downloads/).
+Select a project and explore:
+- Project location and time settings
+- Techno-economic parameters and enabled components
+- Optimization and reliability constraints
+- Time series for load, solar, wind, and grid
+- Forecast error metrics with RMSE, MAE, and bias
 
-### **2. Set Up the Julia Environment**
-Navigate into your project folder and run the following commands in the Julia REPL to install the required packages:
+---
 
-```julia
-import Pkg
-Pkg.activate(".")
-Pkg.instantiate()
+### 📈 Visualize Results
+
+Explore the outcome of an optimization run:
+- System sizing summary and bar chart
+- Seasonal or non-seasonal dispatch flow plot
+- Net present cost and cost structure (CAPEX, OPEX, replacements, subsidies, salvage)
+- Key performance indicators such as unmet demand, renewable share, and energy import/export
+
+---
+
+### 🔍 Compare Projects
+
+Choose two projects to compare:
+- Installed capacity per technology
+- Dispatch behavior for each project
+- Cost breakdown comparison
+- Operational indicators like LCOE, fuel usage, curtailment, or lost load
+
+Smart formatting highlights mismatches between project metrics for easy analysis.
+
+---
+
+## How to Use
+
+1. Run the backend model (e.g. `main.jl` in one of the Autarky model folders).
+2. Copy the generated `inputs/` and `results/` folders into a new subdirectory under: Autarky App/projects/your_project_name/
+3. Launch the Streamlit app:
+
+```bash
+cd autarky-streamlit
+streamlit run app.py
 ```
+You can now navigate through the interface to explore or compare your model runs.
 
+## Requirements
+- Python ≥ 3.10
+- streamlit
+- pandas
+- numpy
+- matplotlib
+- pyyaml
+
+Install dependencies with:
+
+```bash
+pip install -r requirements.txt
+```
