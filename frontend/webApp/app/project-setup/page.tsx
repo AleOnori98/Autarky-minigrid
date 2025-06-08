@@ -1,30 +1,40 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useProjectStore } from "@/lib/store";
+import { useRouter } from "next/navigation";
 
-import { useState, useEffect } from "react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useProjectStore } from "@/lib/store"
-import MapComponent from "@/components/map-component"
-import { useRouter } from "next/navigation"
-import Image from "next/image"
+// Dynamically import MapComponent with ssr disabled
+const MapComponent = dynamic(() => import("@/components/map-component"), {
+  ssr: false,
+});
 
 export default function ProjectSetupPage() {
-  const router = useRouter()
-  const { projectData, updateProjectData, submitProject } = useProjectStore()
-
-  const [isClient, setIsClient] = useState(false)
+  const router = useRouter();
+  const { projectData, updateProjectData, submitProject } = useProjectStore();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setIsClient(true)
-    // Get user's current location
-    if (typeof navigator !== "undefined" && navigator.geolocation) {
+    setMounted(true);
+
+    // Only run geolocation code on client side
+    if (typeof window !== "undefined" && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           updateProjectData({
@@ -32,32 +42,32 @@ export default function ProjectSetupPage() {
               latitude: position.coords.latitude,
               longitude: position.coords.longitude,
             },
-          })
+          });
         },
         (error) => {
-          console.log("Error getting location:", error)
+          console.log("Error getting location:", error);
           // Default to Kenya coordinates if location access is denied
           updateProjectData({
             location: {
               latitude: -2.05627616659381,
               longitude: 41.11023900111167,
             },
-          })
-        },
-      )
+          });
+        }
+      );
     }
-  }, [updateProjectData])
+  }, [updateProjectData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      await submitProject()
+      await submitProject();
       // Navigate to next step
-      router.push("/system-configuration")
+      router.push("/system-configuration");
     } catch (error) {
-      console.error("Error submitting project:", error)
+      console.error("Error submitting project:", error);
     }
-  }
+  };
 
   const handleLocationChange = (lat: number, lng: number) => {
     updateProjectData({
@@ -65,11 +75,11 @@ export default function ProjectSetupPage() {
         latitude: lat,
         longitude: lng,
       },
-    })
-  }
+    });
+  };
 
-  if (!isClient) {
-    return <div>Loading...</div>
+  if (!mounted) {
+    return <div>Loading...</div>;
   }
 
   return (
@@ -78,15 +88,18 @@ export default function ProjectSetupPage() {
       <header className="bg-[#FABC5F] px-6 py-4">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-2">
-            <div className="">      <div className="">
-                           <Image
-                            src="/Asset2.svg"
-                            alt="Autarky Logo"
-                            width={40}
-                            height={40}
-                            className="h-10 w-10 "
-                           />
-                        </div></div>
+            <div className="">
+              {" "}
+              <div className="">
+                <Image
+                  src="/Asset2.svg"
+                  alt="Autarky Logo"
+                  width={40}
+                  height={40}
+                  className="h-10 w-10 "
+                />
+              </div>
+            </div>
             <span className="text-xl font-bold text-black">Autarky</span>
           </div>
           <nav className="flex space-x-8">
@@ -111,7 +124,10 @@ export default function ProjectSetupPage() {
             <span className="text-sm text-gray-600">Step 1 of 5</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-black h-2 rounded-full" style={{ width: "20%" }}></div>
+            <div
+              className="bg-black h-2 rounded-full"
+              style={{ width: "20%" }}
+            ></div>
           </div>
         </div>
       </div>
@@ -119,16 +135,21 @@ export default function ProjectSetupPage() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         <p className="text-lg mb-8 max-w-4xl">
-          Welcome to the Project Setup page, here you can create a new modeling project by defining its name, location,
-          simulation horizon, and time resolution to lay the foundation for your energy system analysis.
+          Welcome to the Project Setup page, here you can create a new modeling
+          project by defining its name, location, simulation horizon, and time
+          resolution to lay the foundation for your energy system analysis.
         </p>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <form
+          onSubmit={handleSubmit}
+          className="grid grid-cols-1 lg:grid-cols-2 gap-12"
+        >
           {/* Left Column - Map and Location */}
           <div className="space-y-6">
             <div>
               <h3 className="text-lg font-semibold mb-4">
-                Pinpoint your case study location by clicking on the map or entering coordinates below.
+                Pinpoint your case study location by clicking on the map or
+                entering coordinates below.
               </h3>
 
               <div className="grid grid-cols-2 gap-4 mb-4">
@@ -140,7 +161,10 @@ export default function ProjectSetupPage() {
                     step="any"
                     value={projectData.location.latitude}
                     onChange={(e) =>
-                      handleLocationChange(Number.parseFloat(e.target.value) || 0, projectData.location.longitude)
+                      handleLocationChange(
+                        Number.parseFloat(e.target.value) || 0,
+                        projectData.location.longitude
+                      )
                     }
                     className="mt-1"
                   />
@@ -153,7 +177,10 @@ export default function ProjectSetupPage() {
                     step="any"
                     value={projectData.location.longitude}
                     onChange={(e) =>
-                      handleLocationChange(projectData.location.latitude, Number.parseFloat(e.target.value) || 0)
+                      handleLocationChange(
+                        projectData.location.latitude,
+                        Number.parseFloat(e.target.value) || 0
+                      )
                     }
                     className="mt-1"
                   />
@@ -179,7 +206,9 @@ export default function ProjectSetupPage() {
               <Input
                 id="projectName"
                 value={projectData.project_name}
-                onChange={(e) => updateProjectData({ project_name: e.target.value })}
+                onChange={(e) =>
+                  updateProjectData({ project_name: e.target.value })
+                }
                 className="mt-2"
                 placeholder="Enter project name"
               />
@@ -192,7 +221,9 @@ export default function ProjectSetupPage() {
               <Textarea
                 id="description"
                 value={projectData.description}
-                onChange={(e) => updateProjectData({ description: e.target.value })}
+                onChange={(e) =>
+                  updateProjectData({ description: e.target.value })
+                }
                 className="mt-2 min-h-24"
                 placeholder="Enter project description"
               />
@@ -200,7 +231,9 @@ export default function ProjectSetupPage() {
 
             <div>
               <h3 className="text-lg font-semibold mb-4">Time Settings</h3>
-              <p className="text-gray-600 mb-4">Define how long and how detailed your simulation will be:</p>
+              <p className="text-gray-600 mb-4">
+                Define how long and how detailed your simulation will be:
+              </p>
 
               <div className="grid grid-cols-2 gap-6">
                 <div>
@@ -211,7 +244,11 @@ export default function ProjectSetupPage() {
                     min="1"
                     max="50"
                     value={projectData.time_horizon}
-                    onChange={(e) => updateProjectData({ time_horizon: Number.parseInt(e.target.value) || 10 })}
+                    onChange={(e) =>
+                      updateProjectData({
+                        time_horizon: Number.parseInt(e.target.value) || 10,
+                      })
+                    }
                     className="mt-1"
                   />
                   <span className="text-sm text-gray-500">years</span>
@@ -221,7 +258,9 @@ export default function ProjectSetupPage() {
                   <Label htmlFor="timeResolution">Time Resolution:</Label>
                   <Select
                     value={projectData.time_resolution}
-                    onValueChange={(value) => updateProjectData({ time_resolution: value })}
+                    onValueChange={(value) =>
+                      updateProjectData({ time_resolution: value })
+                    }
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue />
@@ -241,17 +280,25 @@ export default function ProjectSetupPage() {
                   <Checkbox
                     id="seasonality"
                     checked={projectData.seasonality_enabled}
-                    onCheckedChange={(checked) => updateProjectData({ seasonality_enabled: checked as boolean })}
+                    onCheckedChange={(checked) =>
+                      updateProjectData({
+                        seasonality_enabled: checked as boolean,
+                      })
+                    }
                   />
                   <Label htmlFor="seasonality">Seasonality:</Label>
                 </div>
 
                 {projectData.seasonality_enabled && (
                   <div>
-                    <Label htmlFor="seasonalityOption">Number of seasons:</Label>
+                    <Label htmlFor="seasonalityOption">
+                      Number of seasons:
+                    </Label>
                     <Select
                       value={projectData.seasonality_option}
-                      onValueChange={(value) => updateProjectData({ seasonality_option: value })}
+                      onValueChange={(value) =>
+                        updateProjectData({ seasonality_option: value })
+                      }
                     >
                       <SelectTrigger className="mt-1 max-w-48">
                         <SelectValue />
@@ -275,11 +322,15 @@ export default function ProjectSetupPage() {
               Back
             </Button>
           </Link>
-          <Button type="submit" onClick={handleSubmit} className="bg-black hover:bg-gray-800 text-white px-8 py-2">
+          <Button
+            type="submit"
+            onClick={handleSubmit}
+            className="bg-black hover:bg-gray-800 text-white px-8 py-2"
+          >
             Next
           </Button>
         </div>
       </main>
     </div>
-  )
+  );
 }
