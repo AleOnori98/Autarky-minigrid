@@ -1,121 +1,100 @@
 import Image from "next/image"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { Github } from "lucide-react"
 
-export default function HomePage() {
+export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-white">
       {/* Header */}
-      <header className="bg-red-500 text-white px-4 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-              <span className="text-red-500 font-bold text-sm">logo</span>
+      <header className="bg-[#FABC5F] px-6 py-4">
+        <div className="flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center space-x-2">
+            <div className="">
+               <Image
+                src="/Asset2.svg"
+                alt="Autarky Logo"
+                width={40}
+                height={40}
+                className="h-10 w-10 "
+               />
             </div>
-            <h1 className="text-2xl font-bold">Autarky</h1>
+            <span className="text-xl font-bold text-black">Autarky</span>
           </div>
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-white hover:text-red-100 transition-colors">
+          <nav className="flex space-x-8">
+            <Link href="#" className="text-black hover:text-gray-700">
               Who we are
-            </a>
-            <a href="#" className="text-white hover:text-red-100 transition-colors">
+            </Link>
+            <Link href="#" className="text-black hover:text-gray-700">
               Contact us
-            </a>
-            <a href="#" className="text-white hover:text-red-100 transition-colors">
+            </Link>
+            <Link href="#" className="text-black hover:text-gray-700">
               Resources
-            </a>
+            </Link>
           </nav>
-          {/* Mobile menu button */}
-          <button className="md:hidden text-white">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-12 lg:py-20">
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
-          {/* Left Content */}
-          <div className="space-y-8">
-            <div className="space-y-6">
-              <h2 className="text-4xl lg:text-5xl xl:text-6xl font-bold leading-tight">
-                Get Started <br className="hidden sm:block" />
-                with <span className="text-red-500">Autarky</span>!
-              </h2>
-
-              <div className="space-y-4">
-                <p className="text-xl lg:text-2xl font-medium text-gray-800">
-                  Open-Source <em>Tools for</em>
-                </p>
-                <p className="text-xl lg:text-2xl font-medium text-gray-800">Designing & Operating</p>
-                <p className="text-xl lg:text-2xl font-medium text-gray-800">
-                  Mini-Grids <em>and</em> Swarm Grids
-                </p>
-                <p className="text-xl lg:text-2xl font-medium text-gray-800">under uncertainties</p>
-              </div>
-
-              <Button
-                size="lg"
-                className="bg-red-500 hover:bg-red-600 text-white px-8 py-4 text-lg font-semibold rounded-lg"
-              >
-                Get Started
-              </Button>
-            </div>
-
-            <div className="space-y-4 text-gray-700 leading-relaxed">
-              <p>
-                Autarky has employed stochastic optimization methods and tools to{" "}
-                <strong>quantify and manage energy supply reliability</strong>, including preventive, corrective, and
-                restorative actions, alongside preparedness measures and dispatch strategies for{" "}
-                <strong>decentralized energy systems' components</strong>.
-              </p>
-            </div>
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        {/* Mini-Grids Section */}
+        <div className="flex items-center gap-8 mb-16">
+          <div className="flex-1">
+            <Image
+              src="/placeholder.svg?height=300&width=400"
+              alt="Mini-grid with solar panels and rural buildings"
+              width={400}
+              height={300}
+              className="rounded-lg"
+            />
           </div>
-
-          {/* Right Content - Dashboard Preview */}
-          <div className="space-y-6">
-            <div className="relative">
-              <Image
-                src="/dashboard-preview.png"
-                alt="Autarky Dashboard showing energy grid maps, network diagrams, and power consumption charts over time"
-                width={600}
-                height={400}
-                className="w-full h-auto rounded-lg shadow-lg"
-                priority
-              />
+          <div className="flex-1 bg-blue-50 p-8 rounded-lg">
+            <h2 className="text-2xl font-bold mb-4">
+              Use Autarky <span className="text-blue-600">Mini-Grids</span> - Online Web Platform
+            </h2>
+            <p className="text-gray-700 mb-4">
+              Easily model a <strong>hybrid mini-grid</strong> from scratch with a{" "}
+              <strong>dynamic, user-friendly interface</strong>. Select components, define uncertainties, and run
+              optimizations to get <strong>optimal sizing, dispatch strategies</strong>, and a complete{" "}
+              <strong>cost analysis</strong>, all in one place.
+            </p>
+            <div className="flex items-center gap-2 mb-6">
+              <Github className="w-5 h-5" />
+              <Link href="https://github.com/tatisgg/Autarky-minigrid" target="_blank" className="text-blue-600 hover:underline">
+                Check our <span className="underline">Github</span> Repository
+              </Link>
             </div>
-
-            <div className="text-center">
-              <p className="text-lg lg:text-xl font-medium text-gray-800 italic">
-                Model, optimize, and manage decentralized energy systems
-                <br />
-                under uncertainty, fully open, fully yours.
-              </p>
-            </div>
+            <Link href="/components">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2">Get Started</Button>
+            </Link>
           </div>
         </div>
 
-        {/* Contributors Section */}
-        <div className="mt-20 pt-12 border-t-2 border-gray-300">
-          <div className="text-center space-y-8">
-            <h3 className="text-xl font-bold text-gray-800 tracking-wider">CONTRIBUTORS:</h3>
-
-            <div className="flex flex-wrap justify-center items-center gap-8 lg:gap-12">
-              {/* NTNU Logo */}
-              <div className="flex items-center gap-2">
-                <Image
-                  src="/ntu.png"
-                  alt="NTNU Logo"
-                  width={100}
-                  height={50}
-                  className="h-12 w-auto"
-                />
-              
-              </div>
-              <div className="bg-black text-white px-4 py-2 rounded">
-                <span className="text-xl font-bold">OPEN4CEC</span>
-              </div>
+        {/* Swarm-Grids Section */}
+        <div className="flex items-center gap-8">
+          <div className="flex-1">
+            <Image
+              src="/placeholder.svg?height=300&width=400"
+              alt="Swarm-grid with multiple solar installations"
+              width={400}
+              height={300}
+              className="rounded-lg"
+            />
+          </div>
+          <div className="flex-1 bg-blue-50 p-8 rounded-lg">
+            <h2 className="text-2xl font-bold mb-4">
+              Use Autarky <span className="text-blue-600">Swarm-Grids</span> - Online Web Platform
+            </h2>
+            <p className="text-gray-700 mb-4">
+              Easily model and <strong>connect off-grid energy units</strong> through a user-friendly interface.
+              Configure components, <strong>optimize energy sharing</strong>, and get efficient sizing, dispatch, and
+              cost analysis across the network.
+            </p>
+            <div className="flex items-center gap-2">
+              <Github className="w-5 h-5" />
+              <Link href="#" className="text-blue-600 hover:underline">
+                Check our <span className="underline">Github</span> Repository
+              </Link>
             </div>
           </div>
         </div>
