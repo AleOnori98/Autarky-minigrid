@@ -35,7 +35,7 @@ Say what we didn’t say.
 Refuse what we could not.  
 *Continue its disobedience.*
 
-To co-create, remix, and share your adaptations, we have a **[GitHub repository]**,  
+To co-create, remix, and share your adaptations, we have a **GitHub repository**,  
 where versions of the letter can live collectively — like open-source code.
 
 You are welcome to **upload your adaptations**, your readings, your voices.
