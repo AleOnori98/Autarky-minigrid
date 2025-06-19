@@ -14,7 +14,7 @@ RUN julia -e "using Pkg; Pkg.instantiate();"
 COPY backend/ .
 
 # Develop the local HSL_jll and precompile everything
-RUN julia -e "using Pkg; Pkg.develop(path=\"./HSL_jll.jl\"); Pkg.precompile()"
+RUN julia -e "using Pkg; Pkg.develop(path=\"./HSL_jll\"); Pkg.precompile()"
 
 # Set default command to launch the backend server
 CMD ["julia", "server.jl"]
