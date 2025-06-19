@@ -1,0 +1,5 @@
+.vscode/
+frontend/
+.git/
+*.md
+LICENSE
