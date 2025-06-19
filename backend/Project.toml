@@ -1,11 +1,9 @@
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 GLPK = "60bf3e95-4087-53dc-ae20-288a0d20c6a6"
-Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b"
 HSL_jll = "017b0a0e-03f4-516a-9b91-836bbd1904dd"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
