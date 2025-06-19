@@ -1,3 +1,8 @@
+# Activating the project environment
+# This ensures that the server uses the correct package versions and dependencies defined in the Project.toml
+using Pkg
+Pkg.activate(@__DIR__)
+
 using HTTP
 
 # === Load API endpoint handlers ===
