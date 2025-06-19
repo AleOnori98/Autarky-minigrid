@@ -8,7 +8,8 @@
     "time_horizon",
     "time_resolution",
     "seasonality_enabled",
-    "seasonality_option"
+    "seasonality_option",
+    "typical_profile"
   ],
   "properties": {
     "project_name": { "type": "string" },
@@ -24,6 +25,7 @@
     "time_horizon": { "type": "integer", "minimum": 1 },
     "time_resolution": { "type": "string" },
     "seasonality_enabled": { "type": "boolean" },
-    "seasonality_option": { "type": "string" }
+    "seasonality_option": { "type": "string" },
+    "typical_profile": { "type": "string" }
   }
 }

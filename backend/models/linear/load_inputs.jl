@@ -24,6 +24,7 @@ is_fully_ac = enabled["fully_ac"] # bool
 layout_id = system_config["layout_id"] # int
 has_seasonality = project_setup["project_settings"]["seasonality"] # bool
 seasonality_option = project_setup["project_settings"]["seasonality_option"] # string
+typical_profile = project_setup["project_settings"]["typical_profile"] # string
 
 # Extract project setup settings
 project_settings = project_setup["project_settings"] # Dict
@@ -45,8 +46,11 @@ end
 
 # Define total number of hours in a year and scaling factor
 annual_hours = 8760
-operation_time_steps = 24  # assuming daily simulation (e.g., 24 hourly steps)
+if typical_profile == "day"
+    operation_time_steps = 24 
+end
 # TODO: Add support for other operation time steps if needed
+
 year_scale_factor = annual_hours / operation_time_steps  
 
 # Define season_weights based on seasonality
