@@ -2,8 +2,13 @@
 # This ensures that the server uses the correct package versions and dependencies defined in the Project.toml
 using Pkg
 Pkg.activate(@__DIR__)
+Pkg.status()  # Print status of installed packages
 
-using HTTP
+@info "Activated environment at: $(Base.active_project())"
+@info "Current LOAD_PATH: $(LOAD_PATH)"
+
+using HTTP  
+@info "HTTP.jl successfully loaded"
 
 # === Load API endpoint handlers ===
 include("src/api/project_setup.jl")

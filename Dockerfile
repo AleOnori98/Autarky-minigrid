@@ -1,19 +1,26 @@
 FROM julia:1.10
 
-# 1. Set working dir inside backend explicitly
+# Set working directory
 WORKDIR /app/backend
 
-# 2. Copy only backend-specific files
+# Show where we are
+RUN echo "Current working directory:" && pwd && ls -la
+
+# Copy environment files first for layer caching
 COPY backend/Project.toml backend/Manifest.toml ./
 
-# 3. Instantiate dependencies
-RUN julia -e "using Pkg; Pkg.instantiate(); Pkg.precompile()"
+# Debug what's inside
+RUN echo "Copied Project.toml:" && cat Project.toml
+RUN echo "Copied Manifest.toml:" && cat Manifest.toml
 
-# 4. Copy full backend code now
-COPY backend .
+# Install packages
+RUN julia -e "using Pkg; println(\"Activating env...\"); Pkg.activate(\".\"); println(\"Instantiating...\"); Pkg.instantiate(); println(\"Precompiling...\"); Pkg.precompile()"
 
-# 5. Expose the port
-EXPOSE 8000
+# Copy the rest of the source
+COPY backend ./
 
-# 6. Run the backend server
+# Show final structure
+RUN echo "Final contents of /app/backend:" && ls -la
+
+# Run the server
 CMD ["julia", "server.jl"]
