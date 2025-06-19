@@ -7,3 +7,4 @@ project_settings:
   project_name: "Faza Mini-Grid"
   description: "Kenya pilot case"
   time_horizon: 20
+  typical_profile: "day"
