@@ -29,7 +29,9 @@ const ROUTES = Dict(
 )
 
 function router(req::HTTP.Request)
-    if haskey(ROUTES, req.target)
+    if req.method in ("GET", "HEAD") && req.target == "/"
+        return HTTP.Response(200, "Autarky backend is live!")
+    elseif haskey(ROUTES, req.target)
         return ROUTES[req.target](req)
     else
         return HTTP.Response(404, "Route not found")
@@ -39,9 +41,9 @@ end
 # === Start HTTP server ===
 try
     port = parse(Int, get(ENV, "PORT", "8000"))
-    @info "🚀 Starting server on 0.0.0.0:$port"
+    @info "Starting server on 0.0.0.0:$port"
     HTTP.serve(router, "0.0.0.0", port)
 catch e
-    @error "🔥 Failed to start server: $e"
+    @error "Failed to start server: $e"
     Base.exit(1)
 end
