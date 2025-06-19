@@ -47,16 +47,13 @@ function router(req::HTTP.Request)
     end
 end
 
-# === Start the HTTP multi-threaded server ===
-# This will run the HTTP router on port 8000, with support for multi-threaded request handling.
-# To enable asynchronous handling (i.e., avoid blocking the main thread), we launch the server in a background task.
-
-Threads.@spawn begin
-    HTTP.serve!(router, "0.0.0.0", 8000; reuseaddr=true, verbose=false)
+# === Start the HTTP multi-threaded server using dynamic port ===
+try
+    port = parse(Int, get(ENV, "PORT", "8000"))
+    @info "Starting server on 0.0.0.0:$port"
+    HTTP.serve!(router, "0.0.0.0", port; reuseaddr=true, verbose=false)
+catch e
+    @error "Failed to start server: $e"
+    Base.exit(1)
 end
-
-# Note:
-# - The server runs indefinitely in the background.
-# - Incoming HTTP requests are handled by the `router` function.
-# - Julia threads will be used to handle concurrent requests, as long as endpoints are designed non-blocking.
 
