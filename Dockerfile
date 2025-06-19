@@ -1,26 +1,20 @@
+# Use official Julia base image
 FROM julia:1.10
 
 # Set working directory
 WORKDIR /app/backend
 
-# Show where we are
-RUN echo "Current working directory:" && pwd && ls -la
-
-# Copy environment files first for layer caching
+# First copy only dependency files to leverage Docker cache
 COPY backend/Project.toml backend/Manifest.toml ./
 
-# Debug what's inside
-RUN echo "Copied Project.toml:" && cat Project.toml
-RUN echo "Copied Manifest.toml:" && cat Manifest.toml
+# Instantiate package environment (this will cache if deps unchanged)
+RUN julia -e "using Pkg; Pkg.instantiate();"
 
-# Install packages
-RUN julia -e "using Pkg; println(\"Activating env...\"); Pkg.activate(\".\"); println(\"Instantiating...\"); Pkg.instantiate(); println(\"Precompiling...\"); Pkg.precompile()"
+# Then copy the full backend (source code and HSL_jll folder)
+COPY backend/ .
 
-# Copy the rest of the source
-COPY backend ./
+# Develop the local HSL_jll and precompile everything
+RUN julia -e "using Pkg; Pkg.develop(path=\"./HSL_jll.jl\"); Pkg.precompile()"
 
-# Show final structure
-RUN echo "Final contents of /app/backend:" && ls -la
-
-# Run the server
+# Set default command to launch the backend server
 CMD ["julia", "server.jl"]
