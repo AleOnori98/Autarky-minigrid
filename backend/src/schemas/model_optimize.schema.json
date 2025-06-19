@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "required": ["project_id", "solver_name"],
+  "properties": {
+    "project_id": { "type": "string" },
+    "solver_name": {
+      "type": "string",
+      "enum": ["IPOPT", "HiGHS", "GLPK"]
+    },
+    "solver_settings": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

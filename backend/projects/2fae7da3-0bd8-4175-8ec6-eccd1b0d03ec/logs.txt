@@ -1,0 +1,23 @@
+The latest version of Julia in the `release` channel is 1.11.5+0.x64.w64.mingw32. You currently have `1.10.5+0.x64.w64.mingw32` installed. Run:
+
+  juliaup update
+
+in your terminal shell to install Julia 1.11.5+0.x64.w64.mingw32 and update the `release` channel to that version.
+WARNING: using JuMP.solver_name in module Main conflicts with an existing identifier.
+WARNING: replacing module Utils.
+WARNING: ignoring conflicting import of Utils.import_time_series into Main
+ERROR: LoadError: UndefVarError: `seasonality` not defined
+Stacktrace:
+ [1] top-level scope
+   @ C:\Users\alessano\OneDrive - NTNU\Desktop\Autarky Models\Autarky Website Backend\models\linear\load_inputs.jl:85
+ [2] include(fname::String)
+   @ Base.MainInclude .\client.jl:489
+ [3] top-level scope
+   @ C:\Users\alessano\OneDrive - NTNU\Desktop\Autarky Models\Autarky Website Backend\models\linear\main.jl:27
+in expression starting at C:\Users\alessano\OneDrive - NTNU\Desktop\Autarky Models\Autarky Website Backend\models\linear\load_inputs.jl:85
+in expression starting at C:\Users\alessano\OneDrive - NTNU\Desktop\Autarky Models\Autarky Website Backend\models\linear\main.jl:27
+[11:05:57] Launching model for formulation: linear
+[11:05:57] Running: julia models\linear\main.jl 2fae7da3-0bd8-4175-8ec6-eccd1b0d03ec HiGHS
+[11:06:07] ERROR: Model execution failed.
+[11:06:07] failed process: Process(`julia --project 'models\linear\main.jl' 2fae7da3-0bd8-4175-8ec6-eccd1b0d03ec HiGHS '{"TimeLimit":60,"MIPGap":0.01}'`, ProcessExited(1)) [1]
+

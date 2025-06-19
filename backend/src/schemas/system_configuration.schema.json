@@ -1,0 +1,22 @@
+{
+  "title": "System Configuration Schema",
+  "type": "object",
+  "required": ["project_id", "enabled_components", "layout_id"],
+  "properties": {
+    "project_id": { "type": "string" },
+    "layout_id": { "type": "integer", "minimum": 1 },
+    "enabled_components": {
+      "type": "object",
+      "properties": {
+        "solar_pv": { "type": "boolean" },
+        "wind_turbine": { "type": "boolean" },
+        "mini_hydro": { "type": "boolean" },
+        "battery": { "type": "boolean" },
+        "diesel_generator": { "type": "boolean" },
+        "biogas_generator": { "type": "boolean" },
+        "grid_connection": { "type": "boolean" },
+        "fully_ac": { "type": "boolean" }
+      }
+    }
+  }
+}

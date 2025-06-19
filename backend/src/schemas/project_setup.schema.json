@@ -1,0 +1,29 @@
+{
+  "title": "Project Setup Schema",
+  "type": "object",
+  "required": [
+    "project_name",
+    "description",
+    "location",
+    "time_horizon",
+    "time_resolution",
+    "seasonality_enabled",
+    "seasonality_option"
+  ],
+  "properties": {
+    "project_name": { "type": "string" },
+    "description": { "type": "string" },
+    "location": {
+      "type": "object",
+      "required": ["latitude", "longitude"],
+      "properties": {
+        "latitude": { "type": "number" },
+        "longitude": { "type": "number" }
+      }
+    },
+    "time_horizon": { "type": "integer", "minimum": 1 },
+    "time_resolution": { "type": "string" },
+    "seasonality_enabled": { "type": "boolean" },
+    "seasonality_option": { "type": "string" }
+  }
+}

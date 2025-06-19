@@ -1,0 +1,9 @@
+project_settings:
+  latitude: -2.05627616659381
+  time_resolution: "hourly"
+  seasonality_option: "4 seasons"
+  longitude: 41.11023900111167
+  seasonality: true
+  project_name: "Faza Mini-Grid"
+  description: "Kenya pilot case"
+  time_horizon: 20

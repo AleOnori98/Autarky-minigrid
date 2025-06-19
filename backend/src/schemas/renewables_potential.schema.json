@@ -1,0 +1,51 @@
+{
+  "title": "Renewables Potential Schema",
+  "type": "object",
+  "required": ["project_id", "technology", "mode", "technical_parameters", "renewables_potential_profile"],
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "technology": {
+      "type": "string",
+      "enum": ["solar_pv", "wind_turbine", "mini_hydro"]
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["csv_upload"]
+    },
+    "technical_parameters": {
+      "type": "object",
+      "required": ["nominal_capacity", "inverter_efficiency"],
+      "properties": {
+        "component_name": { "type": "string" },
+        "nominal_capacity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "inverter_efficiency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "renewables_potential_profile": {
+      "type": "object",
+      "required": ["timestep"],
+      "properties": {
+        "timestep": {
+          "type": "array",
+          "items": { "type": "integer" }
+        }
+      },
+      "patternProperties": {
+        "^(?!timestep).*": {
+          "type": "array",
+          "items": { "type": "number" }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

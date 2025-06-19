@@ -1,108 +1,95 @@
-# Autarky Mini-Grid Optimization Models
+# MiniGrid Optimization Model
 
 ## Overview
+The **MiniGrid Optimization Model** is a **Linear and Deterministic Optimization model** implemented in **JuMP**. It is designed for the **optimal sizing and operation of hybrid renewable energy systems**, determining the best configuration of **solar PV, wind turbines, batteries, backup generators, and grid interaction** to meet energy demand at the **lowest Net Present Cost (NPC)**.
 
-**Autarky** is a modern open-source framework for the **optimal sizing and dispatch of decentralized mini-grid systems**, tailored for rural electrification and energy resilience. Implemented in **Julia** with **JuMP**, it supports hybrid systems including **solar PV**, **batteries**, **diesel generators**, and **grid connection** under both **deterministic** and **stochastic** conditions.
+### **Objective Function: Cost Minimization**
+The model aims to **minimize the Net Present Cost (NPC)** of the system over its lifetime by optimizing **capital investment, operational expenses, replacement costs, and salvage value**, while ensuring that **demand is met** and operational constraints are satisfied. The objective function is:
 
-The framework enables robust and cost-effective energy system design by minimizing the **Net Present Cost (NPC)**, accounting for capital investment, replacement, operational costs, and salvage value — all under a multi-year horizon with optional **seasonality**.
+\[
+\min \text{NPC} = (\text{CAPEX} - \text{Subsidies}) + \text{Replacement Cost} + \text{OPEX} - \text{Salvage Value}
+\]
 
-Autarky supports four distinct optimization formulations:
+where:
+- **CAPEX (Capital Expenditure):** Initial investment cost for system components.
+- **Subsidies:** Government or institutional financial support for renewable energy investments.
+- **Replacement Cost:** Discounted cost of replacing batteries, inverters, or other components over the project lifetime.
+- **OPEX (Operating Expenses):** Fixed and variable costs of system operation, including maintenance, fuel costs, and grid electricity costs.
+- **Salvage Value:** The residual value of assets at the end of the project lifetime, discounted to present value.
 
-- **Regular (Deterministic)**: Least-cost sizing and dispatch assuming perfect foresight.
-- **Expected Value Model (EVM)**: Incorporates uncertainty using expected forecasting errors.
-- **Individual Chance Constraints (ICC)**: Enforces per-time-step reliability under uncertainty.
-- **Joint Chance Constraints (JCC)**: Ensures system-wide reliability across outage windows, the most robust approach.
+### **Techno-Economic Analysis with Discounting**
+The model incorporates a **discounted cash flow analysis**, ensuring a realistic economic assessment over the **project lifetime** by considering **the time value of money**.
+
+- The **discount factor** for year \( y \) is given by:
+
+  \[
+  DF_y = \frac{1}{(1 + r)^y}
+  \]
+
+  where:
+  - \( r \) is the **discount rate** (e.g., 10% per year).
+  - \( y \) represents the year in the **project lifetime** (e.g., 20 years).
+
+By applying these **discounting techniques**, the model provides a **realistic evaluation of long-term costs and economic feasibility** for hybrid renewable energy systems.
 
 ---
 
-## Key Features
+## Mathematical Formulation
 
-- Hybrid energy system modeling: PV, wind, battery, diesel, grid.
-- Modular activation of components and constraints.
-- Seasonal time series support.
-- Reserve planning under outages and forecast uncertainty.
-- Advanced reliability modeling with probabilistic constraints.
-- Objective: Minimize NPC via discounted cash flow logic.
-- Optional unit commitment formulation with integer sizing.
+### **Decision Variables**
+- **Sizing Variables**: Number of solar PV units, wind turbines, battery units, and generators.
+- **Operational Variables**:
+  - Renewable energy generation (solar, wind).
+  - Battery charging/discharging and state of charge (SOC).
+  - Generator production.
+  - Grid import/export.
+  - Unmet demand (lost load).
+
+### **Constraints**
+- **Energy Balance**:  
+  \[
+  \text{Load}(t) = \text{Solar}(t) + \text{Wind}(t) + \text{Battery Discharge}(t) + \text{Generator}(t) + \text{Grid Import}(t) - \text{Grid Export}(t) - \text{Lost Load}(t)
+  \]
+- **Technology-Specific Constraints**:
+  - Maximum generation limits.
+  - Battery SOC dynamics.
+  - Generator fuel consumption and efficiency.
+- **Economic Constraints**:
+  - Maximum capital expenditure (CAPEX).
+  - Minimum renewable energy penetration.
+  - Discounted cash flow for lifetime costs.
 
 ---
 
-## Repository Structure
+## **Model Inputs & Files**
 
-Each model variant (Regular, EVM, ICC, JCC) resides in a dedicated folder with the following structure:
+### **1. Input Data** (Located in `/inputs/` folder)
+- **Time-Series Data** (`.csv` files):
+  - Solar unit of production (retrievable from PVGIS if enabled).
+  - Wind unit of production (retrievable from PVGIS if enabled).
+  - Wind Power Curve related to the Wind Turbine selected.
+  - Load demand profile.
+  - Grid cost for import (optional).
+  - Grid prices for export (optional).
+- **YAML Parameter File** (`parameters.yaml`):
+  - Defines project settings (location, project lifetime, discount rate etc.)
+  - Defines project constraints (e.g., max CAPEX, min renewable share).
+  - Defines techno-economic parameters of each technology.
+  - Specifies solver settings (Gurobi, HiGHS, GLPK, etc.).
+  
+---
 
-```bash
+## **Installation & Setup**
 
-autarky/
-│
-├── RegularModel/ # Deterministic model
-├── ExpectedValueModel/ # EVM with forecast errors
-├── ICCModel/ # Individual Chance Constraints
-├── JCCModel/ # Joint Chance Constraints
-│
-Each model folder contains:
-├── src/
-│ └── main.jl # Entrypoint to run the optimization
-├── inputs/
-│ └── *.csv, *.yaml # Time-series and techno-economic parameters
-└── results/
-└── *.csv # Output results saved here
+### **1. Install Julia**
+Download and install **Julia** from [https://julialang.org/downloads/](https://julialang.org/downloads/).
 
+### **2. Set Up the Julia Environment**
+Navigate into your project folder and run the following commands in the Julia REPL to install the required packages:
+
+```julia
+import Pkg
+Pkg.activate(".")
+Pkg.instantiate()
 ```
 
-To run a model:
-
-```bash
-cd JCCModel/src
-julia main.jl
-```
-
-## Inputs
-- inputs/parameters.yaml: General project and technology configuration
-- CSV time-series:
-  - load.csv: Load demand profile
-  - solar_unit.csv: Unit production of PV
-  - wind_unit.csv: (Optional) Wind production
-  - grid_cost.csv, grid_price.csv: Grid tariffs (optional)
-  - grid_availability.csv: Binary grid outage series (for stochastic modeling)
-  - solar_errors_*.csv, load_errors_*.csv: Forecasting error samples (for EVM/ICC/JCC)
-
-## Model Comparison
-| **Model**        | **Description**                                                                   | **Reliability Scope**                           | **Complexity**               | **Runtime**         | **Robustness**   |
-|------------------|------------------------------------------------------------------------------------|--------------------------------------------------|-------------------------------|-----------------------|-------------------|
-| **Regular**      | Least-cost, deterministic optimization assuming perfect foresight                | None (0%)                                       | Linear                        | 🟢 Fast              | 🔴 Low           |
-| **EVM**          | Penalizes expected shortfall using nonlinear cost terms                          | Expected-value reliability (~20%)               | Nonlinear                     | 🟡 Moderate          | 🟡 Medium        |
-| **ICC**          | Enforces a confidence level per time step using normal quantiles                 | Per-timestep reliability (~60%)                 | Nonlinear                     | 🟡 Moderate          | 🟡 Medium        |
-| **JCC**          | Guarantees feasibility across outage windows using joint probability constraints | Window-based reliability (≥90% over κ hours)    | Nonlinear + Multivariate      | 🔴 Minutes     | 🟢 High          |
-
-
-## Streamlit Viewer App
-Autarky comes with a Streamlit web app to visualize and compare projects:
-
-```bash
-cd Autarky App/
-streamlit run app.py
-```
-
-### Features:
-- 📂 Visualize Inputs: Time series, component specs, costs, error metrics
-- 📈 Visualize Results: Dispatch, cost breakdown, sizing, LCOE, NPC
-- 🔍 Compare Projects: Assess sizing and cost trade-offs across models
-
-### Workflow:
-
-- Run a model (main.jl) in one of the four folders.
-- Copy the generated inputs/ and results/ folders.
-- Paste them into a new folder inside Autarky App/projects/your_project_name/.
-
-Now you can explore the project via the Streamlit UI.
-
-## Requirements
-- Julia ≥ 1.9
-- Packages: JuMP, Ipopt, GLPK, Distributions, YAML, etc.
-- Python ≥ 3.10 for the Streamlit app
-- Streamlit dependencies: pandas, plotly, pyyaml, etc.
-
-## Citation
-This framework builds on the methods described in:
-- Ouanes, N., González Grandón, T., Heitsch, H., Henrion, R. (2025). Optimizing the economic dispatch of weakly-connected mini-grids under uncertainty using joint chance constraints. Annals of Operations Research.

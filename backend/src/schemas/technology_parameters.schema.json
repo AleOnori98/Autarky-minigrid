@@ -1,0 +1,46 @@
+{
+  "title": "Technology Parameters Schema",
+  "type": "object",
+  "required": ["project_id", "economic_settings", "technology_parameters"],
+  "properties": {
+    "project_id": { "type": "string" },
+    "economic_settings": {
+      "type": "object",
+      "required": ["discount_rate", "currency"],
+      "properties": {
+        "discount_rate": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "minLength": 1 }
+      }
+    },
+    "technology_parameters": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "type": "object",
+          "properties": {
+            "investment_cost": { "type": "number" },
+            "operation_cost": { "type": "number" },
+            "subsidy": { "type": "number" },
+            "lifetime": { "type": "integer" },
+            "nominal_capacity": { "type": "number" },
+            "charge_time": { "type": "number" },
+            "discharge_time": { "type": "number" },
+            "charging_efficiency": { "type": "number" },
+            "discharging_efficiency": { "type": "number" },
+            "soc_min": { "type": "number" },
+            "soc_max": { "type": "number" },
+            "soc_initial": { "type": "number" },
+            "nominal_efficiency": { "type": "number" },
+            "partial_load_enabled": { "type": "boolean" },
+            "efficiency_samples": { "type": "integer" },
+            "fuel_type": { "type": "string" },
+            "lower_heating_value": { "type": "number" },
+            "fuel_cost": { "type": "number" },
+            "fuel_limit_enabled": { "type": "boolean" },
+            "fuel_limit_max": { "type": "number" }
+          }
+        }
+      }
+    }
+  }
+}

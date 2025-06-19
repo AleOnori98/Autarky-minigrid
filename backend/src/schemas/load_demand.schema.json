@@ -1,0 +1,24 @@
+{
+  "title": "Load Demand Schema",
+  "type": "object",
+  "required": ["project_id", "load_profile"],
+  "properties": {
+    "project_id": { "type": "string" },
+    "load_profile": {
+      "type": "object",
+      "properties": {
+        "timestep": {
+          "type": "array",
+          "items": { "type": "integer" }
+        }
+      },
+      "patternProperties": {
+        "^(?!timestep).*": {
+          "type": "array",
+          "items": { "type": "number" }
+        }
+      },
+      "required": ["timestep"]
+    }
+  }
+}

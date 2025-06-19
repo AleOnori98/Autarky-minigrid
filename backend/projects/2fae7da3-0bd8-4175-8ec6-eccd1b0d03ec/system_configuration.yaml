@@ -1,0 +1,10 @@
+enabled_components:
+  solar_pv: true
+  wind_turbine: false
+  mini_hydro: false
+  battery: true
+  diesel_generator: false
+  biogas_generator: false
+  grid_connection: false
+  fully_ac: true
+layout_id: 1

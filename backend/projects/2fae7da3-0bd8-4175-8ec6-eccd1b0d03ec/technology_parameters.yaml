@@ -1,0 +1,32 @@
+economic_settings:
+  discount_rate: 6
+  currency: "USD"
+technology_parameters:
+  solar_pv:
+    investment_cost: 1000
+    operation_cost: 2
+    subsidy: 5
+    lifetime: 25
+  battery:
+    nominal_capacity: 10
+    investment_cost: 400
+    operation_cost: 1.5
+    lifetime: 10
+    charge_time: 4
+    discharge_time: 4
+    charging_efficiency: 95
+    discharging_efficiency: 95
+    soc_min: 20
+    soc_max: 90
+    soc_initial: 50
+  diesel_generator:
+    nominal_capacity: 5
+    nominal_efficiency: 30
+    investment_cost: 500
+    operation_cost: 3
+    lifetime: 15
+    fuel_type: "diesel"
+    lower_heating_value: 10.5
+    fuel_cost: 1.2
+    fuel_limit_enabled: true
+    fuel_limit_max: 1200
