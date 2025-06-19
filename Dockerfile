@@ -1,21 +1,18 @@
-# Use the official Julia image
+# --- 1. Use official Julia image ---
 FROM julia:1.10
 
-# Set environment variables
-ENV JULIA_DEPOT_PATH=/root/.julia \
-    JULIA_PROJECT=.
+# --- 2. Set working directory ---
+WORKDIR /app
 
-# Set working directory
-WORKDIR /backend
+# --- 3. Copy backend code only ---
+COPY backend backend
+COPY backend/Project.toml backend/Manifest.toml /app/
 
-# Copy project files
-COPY . .
-
-# Precompile dependencies (this will run `Pkg.instantiate` and `precompile`)
+# --- 4. Install Julia dependencies ---
 RUN julia -e "using Pkg; Pkg.instantiate(); Pkg.precompile()"
 
-# Expose the port Render will use
+# --- 5. Expose the port your server uses ---
 EXPOSE 8000
 
-# Run your HTTP server (adjust the file if needed)
-CMD ["julia", "server.jl"]
+# --- 6. Start the server (adjust if needed) ---
+CMD ["julia", "backend/server.jl"]
