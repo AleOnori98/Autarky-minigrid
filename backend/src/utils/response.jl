@@ -18,7 +18,7 @@ Function to create a success response with a payload.
 - An HTTP response with status 200 and the payload serialized as JSON.
 """
 function success_response(payload::Dict)
-    return HTTP.Response(200, JSON3.write(merge(Dict(:status => "ok"), payload)))
+    return HTTP.Response(200, JSON3.write(merge(Dict("status" => "ok"), payload)))
 end
 
 """
@@ -29,7 +29,7 @@ Function to create an error response with a message.
 - An HTTP response with status 400 and the error message serialized as JSON.
 """
 function error_response(msg::String)
-    return HTTP.Response(400, JSON3.write(Dict(:status => "error", :message => msg)))
+    return HTTP.Response(400, JSON3.write(Dict("status" => "error", "message" => msg)))
 end
 
 end # end of module

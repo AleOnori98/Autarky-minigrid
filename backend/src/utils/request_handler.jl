@@ -46,25 +46,18 @@ function handle_post_request(req, schema_path::String, save_callback::Function)
     end
 
     try
-        # Read and validate the JSON payload
-        body = String(req.body)
-        data = JSON3.read(body)
+        data = JSON3.read(String(req.body))
         validate_with_schema(data, schema_path)
 
-        # Execute user-defined logic and return a Dict with structured results
         result = save_callback(data)
 
-        # Always build from base keys
-        response_dict = Dict(:status => "ok", :message => "Data saved successfully")
-
-        # Merge in result if it's a Dict
         if result isa Dict
-            merge!(response_dict, result)
+            return success_response(result)
         elseif result !== nothing
-            response_dict[:result] = result  # fallback
+            return success_response(Dict("result" => string(result)))
+        else
+            return success_response(Dict("message" => "Request completed successfully"))
         end
-
-        return success_response(response_dict)
     catch err
         return error_response("Request failed: $(err)")
     end
