@@ -33,8 +33,8 @@ function load_demand_handler(req)
             save_load_demand_csv(project_id, profile_dict)
 
             return Dict(
-                :project_id => project_id,
-                :file_paths => ["projects/$project_id/time_series/load_demand.csv"]
+                "project_id" => project_id,
+                "file_paths" => ["projects/$project_id/time_series/load_demand.csv"]
             )
         end
     )
