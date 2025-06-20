@@ -8,6 +8,7 @@ system_config = YAML.load_file(joinpath(project_dir, "system_configuration.yaml"
 tech_params = YAML.load_file(joinpath(project_dir, "technology_parameters.yaml"))
 res_potential = YAML.load_file(joinpath(project_dir, "renewables_potential.yaml"))
 model_uncert = YAML.load_file(joinpath(project_dir, "model_uncertainties.yaml"))
+solver_settings = YAML.load_file(joinpath(project_dir, "solver_parameters.yaml"))
 # === Time Series Paths ===
 ts_dir = joinpath(project_dir, "time_series")
 
@@ -51,6 +52,7 @@ if typical_profile == "day"
 end
 # TODO: Add support for other operation time steps if needed
 
+# Calculate the year scale factor based on operation time steps
 year_scale_factor = annual_hours / operation_time_steps  
 
 # Define season_weights based on seasonality

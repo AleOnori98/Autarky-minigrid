@@ -2,10 +2,9 @@ module CSVWriter
 
 using CSV, DataFrames
 
-export save_load_demand_csv,
-       save_renewables_potential_csv,
-       save_forecast_error_csv,
-       save_availability_matrix_csv
+export save_load_demand_csv, save_renewables_potential_csv,
+       save_grid_cost_csv, save_grid_prices_csv,
+       save_forecast_error_csv, save_availability_matrix_csv
 
 """
     save_load_demand_csv(project_id::String, load_profile::Dict)
@@ -32,6 +31,34 @@ function save_renewables_potential_csv(project_id::String, technology::String, p
     folder = joinpath("projects", project_id, "time_series")
     isdir(folder) || mkpath(folder)
     filepath = joinpath(folder, "$(technology)_potential.csv")
+    CSV.write(filepath, df)
+end
+
+"""
+    save_grid_cost_csv(project_id::String, cost_data::Dict)
+
+Converts a grid cost dictionary to CSV and stores it under:
+projects/{project_id}/time_series/grid_cost.csv
+"""
+function save_grid_cost_csv(project_id::String, cost_data::Dict)
+    df = DataFrame(cost_data)
+    folder = joinpath("projects", project_id, "time_series")
+    isdir(folder) || mkpath(folder)
+    filepath = joinpath(folder, "grid_cost.csv")
+    CSV.write(filepath, df)
+end
+
+"""
+    save_grid_prices_csv(project_id::String, prices_data::Dict)
+
+    Converts a grid prices dictionary to CSV and stores it under:
+projects/{project_id}/time_series/grid_prices.csv
+"""
+function save_grid_prices_csv(project_id::String, prices_data::Dict)
+    df = DataFrame(prices_data)
+    folder = joinpath("projects", project_id, "time_series")
+    isdir(folder) || mkpath(folder)
+    filepath = joinpath(folder, "grid_price.csv")
     CSV.write(filepath, df)
 end
 

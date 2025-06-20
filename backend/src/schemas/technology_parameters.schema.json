@@ -31,13 +31,45 @@
             "soc_max": { "type": "number" },
             "soc_initial": { "type": "number" },
             "nominal_efficiency": { "type": "number" },
-            "partial_load_enabled": { "type": "boolean" },
             "efficiency_samples": { "type": "integer" },
             "fuel_type": { "type": "string" },
             "lower_heating_value": { "type": "number" },
             "fuel_cost": { "type": "number" },
             "fuel_limit_enabled": { "type": "boolean" },
-            "fuel_limit_max": { "type": "number" }
+            "fuel_limit_max": { "type": "number" },
+
+            "allow_export": { "type": "boolean" },
+            "line_capacity": { "type": "number" },
+            "grid_cost": {
+              "type": "object",
+              "properties": {
+                "timestep": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                },
+                "season1": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                }
+              },
+              "additionalProperties": {
+                "type": "array",
+                "items": { "type": "number" }
+              }
+            },
+            "grid_price": {
+              "type": "object",
+              "properties": {
+                "timestep": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                }
+              },
+              "additionalProperties": {
+                "type": "array",
+                "items": { "type": "number" }
+              }
+            }
           }
         }
       }
