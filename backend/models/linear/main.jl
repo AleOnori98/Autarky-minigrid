@@ -18,13 +18,21 @@ include(joinpath(@__DIR__, "utils.jl"))
 using .Utils: import_time_series 
 # Display and export results
 include(joinpath(@__DIR__, "post_processing.jl"))
-using .PostProcessing: write_dispatch_to_csv, write_costs_to_csv, write_sizing_to_csv, write_operation_indicators_to_csv
+using .PostProcessing: write_results_to_json
 
 # MODEL INITIALIZATION
 # --------------------
 
 # Initialize parameters and time series data
 include(joinpath(@__DIR__, "load_inputs.jl"))
+
+# Define sets
+T = operation_time_steps
+if has_seasonality
+    S = num_seasons
+else
+    S = 1
+end
 
 # Initialize the optimization model
 println("\nInitializing the optimization model...")
@@ -69,7 +77,6 @@ if has_diesel_generator == true
     @variable(model, generator_units >= 0, base_name="Generator_Units") # [units of nominal capacity]
     # Operation
     @variable(model, generator_production[t=1:T, s=1:S] >= 0, base_name="Generator_Production") # [kWh]
-    @variable(model, generator_fuel_consumption[t=1:T, s=1:S] >= 0, base_name="Generator_Fuel_Consumption")  # [liters/hour]
 end
 # TODO: Add support for unit committment
 
@@ -153,27 +160,11 @@ if has_battery == true
 end
 
 # Generator Capacity Limit (if applicable)
-if has_generator == true
+if has_diesel_generator == true
     @constraint(model, [t=1:T, s=1:S], generator_production[t,s] <= generator_units * generator_nominal_capacity * Δt)
-
-    # Partial Load constraints (fuel consumtpion piecewise linear approximation)
-    # Compute fuel consumption points
-    fuel_power_points = [sampled_relative_output[i] * generator_nominal_capacity for i in eachindex(sampled_relative_output)]
-    fuel_consumption_samples = [(sampled_relative_output[i] * generator_nominal_capacity) / (sampled_efficiency[i] * fuel_lhv) for i in eachindex(sampled_relative_output)]
-
-    # Add piecewise fuel consumption linear constraints
-    for s in 1:S
-        for t in 1:T
-            for i in 1:(length(sampled_relative_output) - 1)
-                slope = (fuel_consumption_samples[i+1] - fuel_consumption_samples[i]) / (fuel_power_points[i+1] - fuel_power_points[i])
-                
-                @constraint(model, generator_fuel_consumption[t,s] >= slope * (generator_production[t,s] - fuel_power_points[i] * generator_units) +
-                                                                fuel_consumption_samples[i] * generator_units)
-            end
-        end
-    end
  end
 
+ # Grid Connection Operation constraints
 if has_grid_connection == true
     @constraint(model, [t=1:T, s=1:S], grid_import[t,s] <= grid_availability[t,s] * (max_line_capacity * Δt))
     if allow_grid_export == true
@@ -243,7 +234,7 @@ if has_diesel_generator
     for s in 1:S
         for t in 1:T
             # Use fuel consumption for fuel cost calculation
-            OPEX_variable_expr[t, s] += generator_fuel_consumption[t, s] * fuel_cost
+            OPEX_variable_expr[t, s] += (generator_production[t, s] / (generator_efficiency * fuel_lhv)) * fuel_cost
         end
     end
 end
@@ -265,52 +256,66 @@ println("Cost Expressions added successfully to the model.")
 
 println("Model initialized successfully")
 
+# ==================
 # SOLVING THE MODEL
-# -----------------
+# ==================
 
-# Load solver settings from YAML
+# Load solver settings
 solver_params = YAML.load_file(joinpath(project_dir, "solver_parameters.yaml"))
 solver_name = solver_params["solver_name"]
+solver_settings = solver_params["solver_settings"]
 
-# Initialize HiGHS solver
+# Initialize optimizer
 if solver_name == "HiGHS"
     using HiGHS
     optimizer = optimizer_with_attributes(HiGHS.Optimizer)
+elseif solver_name == "GLPK"
+    using GLPK
+    optimizer = optimizer_with_attributes(GLPK.Optimizer)
+elseif solver_name == "Ipopt"
+    using Ipopt
+    optimizer = optimizer_with_attributes(Ipopt.Optimizer)
+else
+    error("Unsupported solver: $solver_name")
 end
-# TODO: Add support for other solvers
-    
-# Setting solver options
-solver_settings = solver_params["solver_settings"]
+
+# Apply solver settings
 for (key, value) in solver_settings
     set_optimizer_attribute(optimizer, key, value)
 end
 
-# Attach the solver to the model
+# Attach optimizer to the model
 set_optimizer(model, optimizer)
 
-# Solve the optimization problem
+# Solve the model
 @time optimize!(model)
 solution_summary(model, verbose = true)
 
-# Evaluate solution status
+# Check solution status
 status = termination_status(model)
-
 if status == MOI.INFEASIBLE
-    error("\nOptimization result: INFEASIBLE. The model has no feasible solution. Please check constraints and input parameters.")
+    error("\n❌ Optimization result: INFEASIBLE. Please verify constraints and input parameters.")
 else
-    println("\nOptimization completed with status: ", status)
+    println("\n✅ Optimization completed with status: ", status)
 end
 
-# POST PROCESSING
-# -----------------
+# ==================
+# POST-PROCESSING
+# ==================
 
-# Display results
+# Display results in console
 include(joinpath(@__DIR__, "display_results.jl"))
 
-# Export results to CSV
-write_sizing_to_csv(model, parameters)
-write_costs_to_csv(model, parameters)
-write_dispatch_to_csv(model, parameters)
-write_operation_indicators_to_csv(model, parameters, season_weights)
-
+# Save results to JSON if solution is usable
+if status in (MOI.OPTIMAL, MOI.LOCALLY_SOLVED, MOI.TIME_LIMIT)
+    write_results_to_json(
+        model,
+        tech_params,
+        res_potential,
+        project_setup,
+        system_config,
+        season_weights,
+        project_id
+    )
+end
 
