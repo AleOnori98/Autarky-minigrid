@@ -28,13 +28,25 @@ const ROUTES = Dict(
     "/model-optimize" => model_optimize_handler,
 )
 
+# === Add CORS headers ===
+function add_cors_headers(res::HTTP.Response)
+    HTTP.setheader(res, "Access-Control-Allow-Origin" => "*")  # Allow any origin for now
+    HTTP.setheader(res, "Access-Control-Allow-Methods" => "GET, POST, OPTIONS")
+    HTTP.setheader(res, "Access-Control-Allow-Headers" => "Content-Type")
+    return res
+end
+
+# === Central request handler with CORS ===
 function router(req::HTTP.Request)
-    if req.method in ("GET", "HEAD") && req.target == "/"
-        return HTTP.Response(200, "Autarky backend is live!")
+    if req.method == "OPTIONS"
+        return add_cors_headers(HTTP.Response(200))  # Preflight response
+    elseif req.method in ("GET", "HEAD") && req.target == "/"
+        return add_cors_headers(HTTP.Response(200, "Autarky backend is live!"))
     elseif haskey(ROUTES, req.target)
-        return ROUTES[req.target](req)
+        res = ROUTES[req.target](req)
+        return add_cors_headers(res)
     else
-        return HTTP.Response(404, "Route not found")
+        return add_cors_headers(HTTP.Response(404, "Route not found"))
     end
 end
 
