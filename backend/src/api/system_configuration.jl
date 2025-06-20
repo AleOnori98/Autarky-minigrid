@@ -30,7 +30,7 @@ to the project directory under a valid project_id.
 }
 
 # Returns:
-- On success: status, message, layout_id, project_id
+- On success: status, message, layout_id, project_id, file_paths
 - On error: status, message
 """
 function system_configuration_handler(req)
@@ -38,8 +38,13 @@ function system_configuration_handler(req)
         req,
         SCHEMA_PATHS["system_configuration"],
         data -> begin
-            save_system_configuration(data[:project_id], Dict(data))
-            return data[:project_id]  # Ensure project_id is included in response
+            project_id = data[:project_id]
+            save_system_configuration(project_id, Dict(data))
+
+            return Dict(
+                :project_id => project_id,
+                :file_paths => ["projects/$project_id/system_configuration.yaml"]
+            )
         end
     )
 end

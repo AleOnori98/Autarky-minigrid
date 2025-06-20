@@ -28,10 +28,14 @@ function load_demand_handler(req)
         req,
         SCHEMA_PATHS["load_demand"],
         data -> begin
-            # Ensure load_profile is a standard Dict
             project_id = data[:project_id]
             profile_dict = Dict(data[:load_profile])
             save_load_demand_csv(project_id, profile_dict)
+
+            return Dict(
+                :project_id => project_id,
+                :file_paths => ["projects/$project_id/time_series/load_demand.csv"]
+            )
         end
     )
 end

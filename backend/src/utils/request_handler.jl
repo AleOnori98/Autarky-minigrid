@@ -37,8 +37,8 @@ Generic handler for POST endpoints that:
 - `save_callback`: Function that accepts a parsed Dict or JSON3.Object and returns the `project_id` (or `nothing`)
 
 # Returns:
-- On success: HTTP 200 response with `status`, `message`, and optional `project_id`
-- On failure: HTTP 400 response with error details
+- On success: `HTTP.Response` with status 200 and a JSON body containing the result
+- On failure: `HTTP.Response` with status 400 and an error message
 """
 function handle_post_request(req, schema_path::String, save_callback::Function)
     if req.method != "POST"
@@ -51,13 +51,17 @@ function handle_post_request(req, schema_path::String, save_callback::Function)
         data = JSON3.read(body)
         validate_with_schema(data, schema_path)
 
-        # Execute user-defined logic and return project_id (if any)
+        # Execute user-defined logic and return a Dict with structured results
         result = save_callback(data)
 
-        # Build a standard success payload
+        # Always build from base keys
         response_dict = Dict(:status => "ok", :message => "Data saved successfully")
-        if result !== nothing
-            response_dict[:project_id] = result
+
+        # Merge in result if it's a Dict
+        if result isa Dict
+            merge!(response_dict, result)
+        elseif result !== nothing
+            response_dict[:result] = result  # fallback
         end
 
         return success_response(response_dict)

@@ -34,7 +34,8 @@ against a schema, generates a unique `project_id`, stores the data in a YAML fil
 {
   "status": "ok",
   "message": "Data saved successfully",
-  "project_id": "c9bfcf7e-7164-4d83-b40f-03b0fa9602f7"
+  "project_id": "c9bfcf7e-7164-4d83-b40f-03b0fa9602f7",
+  "file_paths": ["projects/c9bfcf7e-7164-4d83-b40f-03b0fa9602f7/project_setup.yaml"]
 }
 """
 function project_setup_handler(req)
@@ -43,8 +44,12 @@ function project_setup_handler(req)
         SCHEMA_PATHS["project_setup"],
         data -> begin
             project_id = string(UUIDs.uuid4())
-            save_project_setup(project_id, Dict(data))  # Convert to mutable Dict
-            return project_id
+            save_project_setup(project_id, Dict(data))  # Save to YAML
+
+            return Dict(
+                :project_id => project_id,
+                :file_paths => ["projects/$project_id/project_setup.yaml"]
+            )
         end
     )
 end
