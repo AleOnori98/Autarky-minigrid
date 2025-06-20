@@ -1,4 +1,0 @@
-solver_settings:
-  TimeLimit: 60
-  MIPGap: 0.01
-solver_name: "HiGHS"

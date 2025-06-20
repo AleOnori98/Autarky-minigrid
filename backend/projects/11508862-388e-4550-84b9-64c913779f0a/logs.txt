@@ -1,0 +1,81 @@
+The latest version of Julia in the `release` channel is 1.11.5+0.x64.w64.mingw32. You currently have `1.10.5+0.x64.w64.mingw32` installed. Run:
+
+  juliaup update
+
+in your terminal shell to install Julia 1.11.5+0.x64.w64.mingw32 and update the `release` channel to that version.
+WARNING: using JuMP.solver_name in module Main conflicts with an existing identifier.
+WARNING: replacing module Utils.
+WARNING: ignoring conflicting import of Utils.import_time_series into Main
+Running HiGHS 1.9.0 (git hash: 66f735e60): Copyright (c) 2024 HiGHS under MIT licence terms
+Coefficient ranges:
+  Matrix [1e-02, 9e+02]
+  Cost   [6e-02, 5e+03]
+  Bound  [0e+00, 0e+00]
+  RHS    [4e+00, 2e+01]
+Presolving model
+736 rows, 455 cols, 1832 nonzeros  0s
+681 rows, 400 cols, 1974 nonzeros  0s
+Presolve : Reductions: rows 681(-91); columns 400(-83); elements 1974(+70)
+Solving the presolved LP
+Using EKK dual simplex solver - serial
+  Iteration        Objective     Infeasibilities num(sum)
+          0     0.0000000000e+00 Pr: 96(2417.64); Du: 0(5.08445e-11) 0s
+        268     1.5412729198e+04 Pr: 0(0) 0s
+Solving the original LP from the solution after postsolve
+Model status        : Optimal
+Simplex   iterations: 268
+Objective value     :  1.5412729198e+04
+Relative P-D gap    :  0.0000000000e+00
+HiGHS run time      :          0.00
+
+Initializing the optimization model...
+Variables added successfully to the model.
+Energy Balance Constraint added successfully.
+Operation Constraints added successfully to the model.
+Cost Expressions added successfully to the model.
+Model initialized successfully
+  0.123950 seconds (127.60 k allocations: 9.069 MiB, 94.63% compilation time: 96% of which was recompilation)
+
+✅ Optimization completed with status: OPTIMAL
+
+------ System Optimization Settings ------
+
+Project Time Settings:
+ Project Time Horizon: 20 years
+ Number of Operation Time Steps: 24 hours
+ Number of Seasons: 4
+
+Optimization Settings:
+  System Components: Solar PV, Battery Bank, Backup Generator
+
+------ System Optimization Results ------
+
+System Sizing:
+  Solar Capacity: 0.0 kW
+  Battery Capacity: 0.0 kWh
+  Generator Capacity: 20.48 kW
+
+Project Costs:
+  Net Present Cost: 15.41 kUSD
+  Total Investment Cost: 10.24 kUSD
+  Total Subsidies: 0.0 kUSD
+  Discounted Replacement Cost: 0.0 kUSD
+  Discounted Total Operation Cost: 5.17 kUSD
+  Discounted Salvage Value: 0.0 kUSD
+  Levelized Cost of Energy (LCOE): 1.07 USD/kWh
+
+Optimal Operation:
+  Total Annual Solar Production: -0.0 MWh/year
+  Solar Curtailment: NaN %
+  Total Battery Charge: 0.0 MWh/year
+  Total Battery Discharge: -0.0 MWh/year
+  Total Annual Generator Production: 86.65 MWh/year
+  Total Fuel Consumption: 8252.18 liters/year
+  Renewable Penetration: 0.0 %
+
+----------------------------------------
+Results saved to projects\11508862-388e-4550-84b9-64c913779f0a\results\results.json
+[18:18:50] Launching model for formulation: linear
+[18:18:50] Running: julia models\linear\main.jl 11508862-388e-4550-84b9-64c913779f0a HiGHS
+[18:19:04] Optimization completed successfully.
+[18:19:04] Results written to projects\11508862-388e-4550-84b9-64c913779f0a\results\results.json

@@ -1,5 +1,0 @@
-grid_outage_settings:
-  avg_outages_per_year: 10
-  avg_outage_duration: 3
-grid_connected: true
-formulation: "linear"

@@ -3,7 +3,7 @@ enabled_components:
   wind_turbine: false
   mini_hydro: false
   battery: true
-  diesel_generator: false
+  diesel_generator: true
   biogas_generator: false
   grid_connection: false
   fully_ac: true
