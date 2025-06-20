@@ -1,3 +1,4 @@
+
 # === Activate environment ===
 using Pkg
 Pkg.activate(@__DIR__)
@@ -8,6 +9,8 @@ Pkg.activate(@__DIR__)
 # === Load packages ===
 using HTTP
 
+@info "Working directory: $(pwd())"
+
 # === Load API handlers ===
 include("src/api/project_setup.jl")
 include("src/api/system_configuration.jl")
@@ -16,6 +19,7 @@ include("src/api/load_demand.jl")
 include("src/api/renewables_potential.jl")
 include("src/api/model_uncertainties.jl")
 include("src/api/model_optimize.jl")
+include("src/api/status.jl")
 
 # === Define routes ===
 const ROUTES = Dict(
@@ -30,21 +34,22 @@ const ROUTES = Dict(
 
 # === Add CORS headers ===
 function add_cors_headers(res::HTTP.Response)
-    HTTP.setheader(res, "Access-Control-Allow-Origin" => "*")  # Allow any origin for now
+    HTTP.setheader(res, "Access-Control-Allow-Origin" => "*")
     HTTP.setheader(res, "Access-Control-Allow-Methods" => "GET, POST, OPTIONS")
     HTTP.setheader(res, "Access-Control-Allow-Headers" => "Content-Type")
     return res
 end
 
-# === Central request handler with CORS ===
+# === Central router with /status support ===
 function router(req::HTTP.Request)
     if req.method == "OPTIONS"
-        return add_cors_headers(HTTP.Response(200))  # Preflight response
+        return add_cors_headers(HTTP.Response(200))  # CORS preflight
     elseif req.method in ("GET", "HEAD") && req.target == "/"
         return add_cors_headers(HTTP.Response(200, "Autarky backend is live!"))
+    elseif startswith(req.target, "/status")
+        return add_cors_headers(status_handler(req))
     elseif haskey(ROUTES, req.target)
-        res = ROUTES[req.target](req)
-        return add_cors_headers(res)
+        return add_cors_headers(ROUTES[req.target](req))
     else
         return add_cors_headers(HTTP.Response(404, "Route not found"))
     end
