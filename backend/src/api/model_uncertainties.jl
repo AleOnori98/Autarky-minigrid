@@ -107,8 +107,8 @@ function model_uncertainties_handler(req)
             push!(saved_files, "projects/$project_id/model_uncertainties.yaml")
 
             return Dict(
-                :project_id => project_id,
-                :file_paths => saved_files
+                "project_id" => project_id,
+                "file_paths" => saved_files
             )
         end
     )
