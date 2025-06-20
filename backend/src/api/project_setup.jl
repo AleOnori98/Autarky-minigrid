@@ -47,8 +47,8 @@ function project_setup_handler(req)
             save_project_setup(project_id, Dict(data))  # Save to YAML
 
             return Dict(
-                :project_id => project_id,
-                :file_paths => ["projects/$project_id/project_setup.yaml"]
+                "project_id" => project_id,
+                "file_paths" => ["projects/$project_id/project_setup.yaml"]
             )
         end
     )
