@@ -36,6 +36,7 @@ project_lifetime = project_settings["time_horizon"] # int
 discount_rate = tech_params["economic_settings"]["discount_rate"] 
 # Calculate the yearly discount factor
 discount_factor = [1 / ((1 + discount_rate) ^ y) for y in 1:project_lifetime]
+currency = tech_params["economic_settings"]["currency"] # string
 
 # Logic for time resolution
 if time_resolution == "hourly"
@@ -88,7 +89,7 @@ end
 
 # Load Demand time series from CSV file
 load_path = joinpath(ts_dir, "load_demand.csv")
-load = import_time_series(load_path, num_seasons, seasonality)
+load = import_time_series(load_path, num_seasons, has_seasonality)
 
 # Solar PV
 if has_solar
@@ -186,21 +187,12 @@ end
 if has_diesel_generator
     dg = tech_params["technology_parameters"]["diesel_generator"]
     generator_nominal_capacity = dg["nominal_capacity"]
-    generator_efficiency = dg["nominal_efficiency"] 
-    allow_partial_load = dg["partial_load_enabled"]
-    n_samples = dg["efficiency_samples"]
+    generator_efficiency = dg["nominal_efficiency"]
     generator_capex = dg["investment_cost"]
     generator_opex = dg["operation_cost"]
     generator_lifetime = dg["lifetime"]
     fuel_lhv = dg["lower_heating_value"]
     fuel_cost = dg["fuel_cost"]
-
-    # Partial Load Efficiency Curve
-    n_samples = 10
-    generator_efficiency_curve_path = joinpath(@__DIR__, "config", "generator_efficiency_curve.csv")
-    generator_efficiency_curve = CSV.read(generator_efficiency_curve_path, DataFrame)
-    # Sample the efficiency curve for piece-wise linear interpolation
-    sampled_relative_output, sampled_efficiency = sample_efficiency_curve(generator_efficiency_curve, n_samples)
 
     # Calculate number of replacements
     generator_replacements = max(0, floor((project_lifetime - 1) / generator_lifetime))
