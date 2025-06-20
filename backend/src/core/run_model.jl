@@ -21,69 +21,70 @@ end
 """
     run_model_async(project_id::String, solver::String, settings::Dict)
 
-Asynchronously launches the appropriate JuMP optimization model using the formulation
-defined in model_uncertainties.yaml. Logs all activity to logs.txt and sets status.txt.
+Launches the JuMP optimization model using the formulation
+defined in model_uncertainties.yaml. Logs activity and writes status.txt.
 """
 function run_model_async(project_id::String, solver::String, settings::Dict)
-    Threads.@spawn begin
-        project_dir = joinpath("projects", project_id)
+    project_dir = joinpath("projects", project_id)
+    @info "🟢 Starting run_model_async for project $project_id with solver $solver"
+    @info "🟢 Settings: $settings"
+    @info "🟢 Project directory: $project_dir"
 
-        try
-            isdir(project_dir) || error("Project folder does not exist: $project_id")
+    try
+        isdir(project_dir) || error("❌ Project folder does not exist: $project_id")
 
-            # === Load formulation from YAML ===
-            yaml_path = joinpath(project_dir, "model_uncertainties.yaml")
-            isfile(yaml_path) || error("Missing model_uncertainties.yaml for project $project_id")
-            formulation = YAML.load_file(yaml_path)["formulation"]
+        yaml_path = joinpath(project_dir, "model_uncertainties.yaml")
+        isfile(yaml_path) || error("❌ Missing model_uncertainties.yaml for project $project_id")
 
-            # === Paths ===
-            main_script  = joinpath("models", formulation, "main.jl")
-            log_file     = joinpath(project_dir, "logs.txt")
-            results_file = joinpath(project_dir, "results", "results.json")
+        formulation = YAML.load_file(yaml_path)["formulation"]
+        main_script = joinpath("models", formulation, "main.jl")
+        log_file = joinpath(project_dir, "logs.txt")
+        results_file = joinpath(project_dir, "results", "results.json")
 
-            # === Write initial status ===
-            write_status(project_dir, "running")
+        @info "🟢 Formulation: $formulation"
+        @info "🟢 Main script: $main_script"
 
-            # === Prepare command
-            settings_json = JSON3.write(settings)
-            cmd = `julia --project $main_script $project_id $solver $settings_json`
+        # Set initial status
+        write_status(project_dir, "running")
 
-            # === Run and capture logs
-            open(log_file, "w") do log_io
-                try
-                    log_line(log_io, "Launching model for formulation: $formulation")
-                    log_line(log_io, "Running: julia $main_script $project_id $solver")
+        # Build command
+        settings_json = JSON3.write(settings)
+        cmd = `julia --project $main_script $project_id $solver $settings_json`
+        @info "🟢 Command prepared: $cmd"
 
-                    run(pipeline(cmd, stdout=log_io, stderr=log_io); wait=true)
-
-                    log_line(log_io, "Optimization completed successfully.")
-                    log_line(log_io, "Results written to $results_file")
-
-                catch err
-                    
-                    log_line(log_io, "ERROR: Model execution failed.")
-                    log_line(log_io, sprint(showerror, err))
-                end
-            end
-
-            # === Write final status
-            write_status(project_dir, isfile(results_file) ? "done" : "error")
-
-        catch err_outer
-            # Write fallback status
-            try write_status(project_dir, "error") catch end
-
-            # Attempt fallback logging
+        # Run and log
+        open(log_file, "w") do log_io
             try
-                open(joinpath(project_dir, "logs.txt"), "a") do log_io
-                    log_line(log_io, "FATAL ERROR: Unexpected failure in run_model_async")
-                    log_line(log_io, sprint(showerror, err_outer))
-                end
-            catch
-                # Do nothing if logs.txt can't be written
-            end
+                log_line(log_io, "Launching model for formulation: $formulation")
+                log_line(log_io, "Running command: $cmd")
 
-            @error "Optimization failed for project $project_id" exception=err_outer
+                # Stream logs directly (lower memory pressure)
+                run(pipeline(cmd; stdout=log_io, stderr=log_io))
+
+                log_line(log_io, "Optimization completed successfully.")
+                log_line(log_io, "Checking for results file at: $results_file")
+
+            catch err
+                log_line(log_io, "❌ ERROR during model execution")
+                log_line(log_io, sprint(showerror, err))
+            end
+        end
+
+        # Set final status based on results file
+        final_status = isfile(results_file) ? "done" : "error"
+        write_status(project_dir, final_status)
+        @info "🟢 Final status for $project_id: $final_status"
+
+    catch err_outer
+        @error "❌ FATAL ERROR in run_model_async for $project_id" exception=err_outer
+        try
+            write_status(project_dir, "error")
+            open(joinpath(project_dir, "logs.txt"), "a") do log_io
+                log_line(log_io, "FATAL ERROR: Unexpected failure in run_model_async")
+                log_line(log_io, sprint(showerror, err_outer))
+            end
+        catch
+            @warn "⚠ Unable to write fallback status or logs for $project_id"
         end
     end
 end
