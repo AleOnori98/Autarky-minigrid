@@ -42,8 +42,8 @@ function system_configuration_handler(req)
             save_system_configuration(project_id, Dict(data))
 
             return Dict(
-                :project_id => project_id,
-                :file_paths => ["projects/$project_id/system_configuration.yaml"]
+                "project_id" => project_id,
+                "file_paths" => ["projects/$project_id/system_configuration.yaml"]
             )
         end
     )
