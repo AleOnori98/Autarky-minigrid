@@ -31,6 +31,7 @@ function save_yaml_data(project_id::String, filename::String, content::Dict)
 
     yaml_path = joinpath(project_dir, filename)
     YAML.write_file(yaml_path, content)
+    @info "✅ Saved $filename for project ID $project_id at $yaml_path"
 end
 
 
@@ -53,6 +54,7 @@ function save_project_setup(project_id::String, data::Dict)
         )
     )
     save_yaml_data(project_id, "project_setup.yaml", yaml_content)
+
 end
 
 """

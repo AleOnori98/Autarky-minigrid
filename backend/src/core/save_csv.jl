@@ -18,6 +18,7 @@ function save_load_demand_csv(project_id::String, load_profile::Dict)
     isdir(folder) || mkpath(folder)
     filepath = joinpath(folder, "load_demand.csv")
     CSV.write(filepath, df)
+    @info "✅ Saved load demand profile for project ID $project_id at $filepath"
 end
 
 """
@@ -32,6 +33,7 @@ function save_renewables_potential_csv(project_id::String, technology::String, p
     isdir(folder) || mkpath(folder)
     filepath = joinpath(folder, "$(technology)_potential.csv")
     CSV.write(filepath, df)
+    @info "✅ Saved renewables potential profile for project ID $project_id at $filepath"
 end
 
 """
@@ -46,6 +48,7 @@ function save_grid_cost_csv(project_id::String, cost_data::Dict)
     isdir(folder) || mkpath(folder)
     filepath = joinpath(folder, "grid_cost.csv")
     CSV.write(filepath, df)
+    @info "✅ Saved grid cost data for project ID $project_id at $filepath"
 end
 
 """
@@ -60,6 +63,7 @@ function save_grid_prices_csv(project_id::String, prices_data::Dict)
     isdir(folder) || mkpath(folder)
     filepath = joinpath(folder, "grid_price.csv")
     CSV.write(filepath, df)
+    @info "✅ Saved grid prices data for project ID $project_id at $filepath"
 end
 
 """
@@ -74,6 +78,7 @@ function save_forecast_error_csv(project_id::String, technology::String, errors:
     isdir(folder) || mkpath(folder)
     filepath = joinpath(folder, "$(technology)_forecast_errors.csv")
     CSV.write(filepath, df)
+    @info "✅ Saved forecast errors for $technology in project ID $project_id at $filepath"
 end
 
 """
@@ -88,6 +93,7 @@ function save_availability_matrix_csv(project_id::String, matrix::Dict)
     isdir(folder) || mkpath(folder)
     filepath = joinpath(folder, "grid_availability_matrix.csv")
     CSV.write(filepath, df)
+    @info "✅ Saved grid availability matrix for project ID $project_id at $filepath"
 end
 
 end # module
