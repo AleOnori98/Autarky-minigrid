@@ -46,8 +46,8 @@ function renewables_potential_handler(req)
             save_renewables_technical_yaml(project_id, technology, parameters_dict)
 
             return Dict(
-                :project_id => project_id,
-                :file_paths => [
+                "project_id" => project_id,
+                "file_paths" => [
                     "projects/$project_id/time_series/$(technology)_potential.csv",
                     "projects/$project_id/renewables_potential.yaml"
                 ]
