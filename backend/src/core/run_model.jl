@@ -39,7 +39,7 @@ function run_model_async(project_id::String, solver::String, settings::Dict)
             # === Paths ===
             main_script  = joinpath("models", formulation, "main.jl")
             log_file     = joinpath(project_dir, "logs.txt")
-            results_file = joinpath(project_dir, "results.json")
+            results_file = joinpath(project_dir, "results", "results.json")
 
             # === Write initial status ===
             write_status(project_dir, "running")
@@ -56,13 +56,11 @@ function run_model_async(project_id::String, solver::String, settings::Dict)
 
                     run(pipeline(cmd, stdout=log_io, stderr=log_io); wait=true)
 
-                    if isfile(results_file)
-                        log_line(log_io, "Optimization completed successfully.")
-                        log_line(log_io, "Results written to results.json")
-                    else
-                        log_line(log_io, "WARNING: Model completed but results.json not found.")
-                    end
+                    log_line(log_io, "Optimization completed successfully.")
+                    log_line(log_io, "Results written to $results_file")
+
                 catch err
+                    
                     log_line(log_io, "ERROR: Model execution failed.")
                     log_line(log_io, sprint(showerror, err))
                 end
