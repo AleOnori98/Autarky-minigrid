@@ -64,8 +64,8 @@ function technology_parameters_handler(req)
             end
 
             return Dict(
-                :project_id => project_id,
-                :file_paths => file_paths
+                "project_id" => project_id,
+                "file_paths" => file_paths
             )
         end
     )
