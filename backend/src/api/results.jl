@@ -9,7 +9,7 @@ Handles GET /status?project_id=abc123
 Returns the current status, log lines, and (if completed) results summary.
 """
 function status_handler(req::HTTP.Request)
-    if req.method == "GET" && occursin("/status", req.target)
+    if req.method == "GET" && occursin("/results", req.target)
         try
             # Parse query parameters to extract project_id
             query = HTTP.URIs.queryparams(HTTP.URIs.URI(req.target))
