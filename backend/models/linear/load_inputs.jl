@@ -208,7 +208,29 @@ end
 
 # TODO: Add similar block for biogas generator
 
-# TODO: Add grid cost & availability if needed
+if has_grid_connection
+    grid = tech_params["technology_parameters"]["grid_connection"] # Dict
+    allow_grid_export = grid["allow_export"] # bool
+    max_line_capacity = grid["line_capacity"]
+
+    # Load CSVs for cost of import and (optional) export price
+    grid_cost_path = joinpath(ts_dir, "grid_cost.csv")
+    grid_cost = import_time_series(grid_cost_path, num_seasons, has_seasonality)
+
+    # Load grid prices if export is allowed
+    grid_prices_path = joinpath(ts_dir, "grid_price.csv")
+    if isfile(grid_prices_path) && allow_grid_export
+        grid_price = import_time_series(grid_prices_path, num_seasons, has_seasonality)
+    end
+
+    # Load grid availability matrix
+    grid_availability_path = joinpath(ts_dir, "grid_availability_matrix.csv")
+    if isfile(grid_availability_path)
+        grid_availability = import_time_series(grid_availability_path, num_seasons, has_seasonality)
+    else
+        error("Grid is connected but no grid_availability_matrix.csv found at $grid_availability_path")
+    end
+end
 
 # TODO: Implement logic for inverter efficiency and losses <--> layout_id
 
