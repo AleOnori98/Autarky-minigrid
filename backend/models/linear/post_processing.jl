@@ -43,8 +43,6 @@ function write_results_to_json(model::Model, tech_params::Dict, res_potential::D
 
     discount_factors = [1 / ((1 + tech_params["economic_settings"]["discount_rate"]) ^ y) for y in 1:project_lifetime]
     currency = tech_params["economic_settings"]["currency"]
-    fuel_lhv = tech_params["technology_parameters"]["diesel_generator"]["lower_heating_value"]
-    generator_nominal_capacity = tech_params["technology_parameters"]["diesel_generator"]["nominal_capacity"]
 
     # === Load Time Series ===
     ts_dir = joinpath("projects", project_id, "time_series")
@@ -66,6 +64,7 @@ function write_results_to_json(model::Model, tech_params::Dict, res_potential::D
         sizing["battery_kwh"] = value(model[:battery_units]) * battery_cap
     end
     if has_generator
+        generator_nominal_capacity = tech_params["technology_parameters"]["diesel_generator"]["nominal_capacity"]
         sizing["generator_kw"] = value(model[:generator_units]) * generator_nominal_capacity
     end
     results["sizing"] = sizing
@@ -93,6 +92,7 @@ function write_results_to_json(model::Model, tech_params::Dict, res_potential::D
         op["wind[MWh]"] = round(sum(season_weights[s] * value(model[:wind_production][t,s]) for t in 1:T, s in 1:num_seasons) / 1000, digits=2)
     end
     if has_generator
+        fuel_lhv = tech_params["technology_parameters"]["diesel_generator"]["lower_heating_value"]
         gen = sum(season_weights[s] * value(model[:generator_production][t,s]) for t in 1:T, s in 1:num_seasons)
         op["generator[MWh]"] = round(gen / 1000, digits=2)
         op["fuel_liters"] = round(gen / fuel_lhv, digits=2)
