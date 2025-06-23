@@ -83,6 +83,7 @@ if has_seasonality
         s => (length(season_months[s]) / 12.0) * year_scale_factor for s in keys(season_months)
     )
 else
+    num_seasons = 1
     # No seasonality → use one season with full weight
     season_weights = Dict(1 => 1.0 * year_scale_factor)
 end
