@@ -2,15 +2,15 @@ module StatusLoader
 
 using JSON3
 
-export get_status_response
+export get_model_results
 
 """
-    get_status_response(project_id::String) -> Dict
+    get_model_results(project_id::String) -> Dict
 
 Reads status.txt, logs.txt, and (optionally) results.json.
 Returns a Dict matching frontend expectations.
 """
-function get_status_response(project_id::String)
+function get_model_results(project_id::String)
     # Initialize paths
     project_dir = joinpath("projects", project_id)
     status_path = joinpath(project_dir, "status.txt")

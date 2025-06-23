@@ -19,7 +19,7 @@ include("src/api/load_demand.jl")
 include("src/api/renewables_potential.jl")
 include("src/api/model_uncertainties.jl")
 include("src/api/model_optimize.jl")
-include("src/api/status.jl")
+include("src/api/results.jl")
 
 # === Define routes ===
 const ROUTES = Dict(
@@ -46,7 +46,7 @@ function router(req::HTTP.Request)
         return add_cors_headers(HTTP.Response(200))  # CORS preflight
     elseif req.method in ("GET", "HEAD") && req.target == "/"
         return add_cors_headers(HTTP.Response(200, "Autarky backend is live!"))
-    elseif startswith(req.target, "/status")
+    elseif startswith(req.target, "/results")
         return add_cors_headers(status_handler(req))
     elseif haskey(ROUTES, req.target)
         return add_cors_headers(ROUTES[req.target](req))

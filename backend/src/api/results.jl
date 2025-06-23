@@ -1,6 +1,6 @@
 using HTTP, JSON3
-include("../core/load_status.jl")
-using .StatusLoader: get_status_response
+include("../core/get_results.jl")
+using .StatusLoader: get_model_results
 
 """
     status_handler(req::HTTP.Request) -> HTTP.Response
@@ -21,7 +21,7 @@ function status_handler(req::HTTP.Request)
             end
 
             # Load the status response for the given project ID
-            response_data = get_status_response(project_id)
+            response_data = get_model_results(project_id)
             return HTTP.Response(200, JSON3.write(response_data))
         catch err
             return HTTP.Response(500, "Internal error: $(sprint(showerror, err))")
