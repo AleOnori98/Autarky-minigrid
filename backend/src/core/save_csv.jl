@@ -3,7 +3,7 @@ module CSVWriter
 using CSV, DataFrames
 
 export save_load_demand_csv, save_renewables_potential_csv,
-       save_grid_cost_csv, save_grid_prices_csv,
+       save_grid_cost_csv, save_grid_price_csv,
        save_forecast_error_csv, save_availability_matrix_csv
 
 """
@@ -52,12 +52,12 @@ function save_grid_cost_csv(project_id::String, cost_data::Dict)
 end
 
 """
-    save_grid_prices_csv(project_id::String, prices_data::Dict)
+    save_grid_price_csv(project_id::String, prices_data::Dict)
 
     Converts a grid prices dictionary to CSV and stores it under:
 projects/{project_id}/time_series/grid_prices.csv
 """
-function save_grid_prices_csv(project_id::String, prices_data::Dict)
+function save_grid_price_csv(project_id::String, prices_data::Dict)
     df = DataFrame(prices_data)
     folder = joinpath("projects", project_id, "time_series")
     isdir(folder) || mkpath(folder)
