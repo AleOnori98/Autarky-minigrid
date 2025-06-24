@@ -96,11 +96,11 @@ load = import_time_series(load_path, num_seasons, has_seasonality)
 if has_solar
     solar = tech_params["technology_parameters"]["solar_pv"]
     solar_capex = solar["investment_cost"]
-    solar_opex = solar["operation_cost"]
-    solar_subsidy_share = solar["subsidy"]
+    solar_opex = solar["operation_cost"] / 100
+    solar_subsidy_share = solar["subsidy"] / 100
     solar_lifetime = solar["lifetime"]
     solar_nominal_capacity = res_potential["solar_pv"]["nominal_capacity"]
-    solar_inverter_efficiency = res_potential["solar_pv"]["inverter_efficiency"]
+    solar_inverter_efficiency = res_potential["solar_pv"]["inverter_efficiency"] / 100
     solar_unit_production = import_time_series(joinpath(ts_dir, "solar_pv_potential.csv"), num_seasons, has_seasonality)
     
     # Calculate number of replacements
@@ -118,11 +118,11 @@ end
 if has_wind
     wind = tech_params["technology_parameters"]["wind_turbine"]
     wind_capex = wind["investment_cost"]
-    wind_opex = wind["operation_cost"]
-    wind_subsidy_share = wind["subsidy"]
+    wind_opex = wind["operation_cost"] / 100
+    wind_subsidy_share = wind["subsidy"] / 100
     wind_lifetime = wind["lifetime"]
     wind_nominal_capacity = res_potential["wind_turbine"]["nominal_capacity"]
-    wind_inverter_efficiency = res_potential["wind_turbine"]["inverter_efficiency"]
+    wind_inverter_efficiency = res_potential["wind_turbine"]["inverter_efficiency"] / 100
     wind_power = import_time_series(joinpath(ts_dir, "wind_turbine_potential.csv"), num_seasons, has_seasonality)
     
     # Calculate number of replacements
@@ -141,8 +141,8 @@ end
 if has_mini_hydro
     hydro = tech_params["technology_parameters"]["mini_hydro"]
     hydro_capex = hydro["investment_cost"]
-    hydro_opex = hydro["operation_cost"]
-    hydro_subsidy_share = hydro["subsidy"]
+    hydro_opex = hydro["operation_cost"] / 100
+    hydro_subsidy_share = hydro["subsidy"] / 100
     hydro_lifetime = hydro["lifetime"]
     hydro_nominal_capacity = res_potential["mini_hydro"]["nominal_capacity"]
     hydro_unit_production = import_time_series(joinpath(ts_dir, "mini_hydro_potential.csv"), num_seasons, has_seasonality)
@@ -163,13 +163,13 @@ if has_battery
     battery = tech_params["technology_parameters"]["battery"]
     battery_nominal_capacity = battery["nominal_capacity"]
     battery_capex = battery["investment_cost"]
-    battery_opex = battery["operation_cost"]
+    battery_opex = battery["operation_cost"] / 100
     battery_lifetime = battery["lifetime"]
-    η_charge = battery["charging_efficiency"] 
-    η_discharge = battery["discharging_efficiency"] 
-    SOC_min = battery["soc_min"] 
-    SOC_max = battery["soc_max"]
-    SOC_0 = battery["soc_initial"] 
+    η_charge = battery["charging_efficiency"] / 100
+    η_discharge = battery["discharging_efficiency"] / 100
+    SOC_min = battery["soc_min"] / 100
+    SOC_max = battery["soc_max"] / 100
+    SOC_0 = battery["soc_initial"] / 100
     t_charge = battery["charge_time"]
     t_discharge = battery["discharge_time"]
 
@@ -188,9 +188,9 @@ end
 if has_diesel_generator
     dg = tech_params["technology_parameters"]["diesel_generator"]
     generator_nominal_capacity = dg["nominal_capacity"]
-    generator_efficiency = dg["nominal_efficiency"]
+    generator_efficiency = dg["nominal_efficiency"] / 100
     generator_capex = dg["investment_cost"]
-    generator_opex = dg["operation_cost"]
+    generator_opex = dg["operation_cost"] / 100
     generator_lifetime = dg["lifetime"]
     fuel_lhv = dg["lower_heating_value"]
     fuel_cost = dg["fuel_cost"]
