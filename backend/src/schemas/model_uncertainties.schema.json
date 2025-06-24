@@ -18,19 +18,14 @@
         "avg_outage_duration": { "type": "number", "minimum": 0 },
         "availability_matrix": {
           "type": "object",
-          "required": ["timestep"],
-          "properties": {
-            "timestep": {
-              "type": "array",
-              "items": { "type": "integer" }
-            }
-          },
+          "minProperties": 1,
           "patternProperties": {
-            "^(?!timestep).*": {
+            ".*": {
               "type": "array",
               "items": { "type": "number" }
             }
-          }
+          },
+          "additionalProperties": false
         }
       }
     },
@@ -40,19 +35,14 @@
       "patternProperties": {
         "^(load|solar_pv|wind_turbine|mini_hydro)$": {
           "type": "object",
-          "required": ["timestep"],
-          "properties": {
-            "timestep": {
-              "type": "array",
-              "items": { "type": "integer" }
-            }
-          },
+          "minProperties": 1,
           "patternProperties": {
-            "^(?!timestep).*": {
+            ".*": {
               "type": "array",
               "items": { "type": "number" }
             }
-          }
+          },
+          "additionalProperties": false
         }
       }
     },

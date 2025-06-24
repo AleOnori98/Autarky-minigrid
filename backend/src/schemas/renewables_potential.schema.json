@@ -32,15 +32,9 @@
     },
     "renewables_potential_profile": {
       "type": "object",
-      "required": ["timestep"],
-      "properties": {
-        "timestep": {
-          "type": "array",
-          "items": { "type": "integer" }
-        }
-      },
+      "minProperties": 1,
       "patternProperties": {
-        "^(?!timestep).*": {
+        ".*": {
           "type": "array",
           "items": { "type": "number" }
         }

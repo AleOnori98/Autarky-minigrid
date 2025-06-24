@@ -37,38 +37,30 @@
             "fuel_cost": { "type": "number" },
             "fuel_limit_enabled": { "type": "boolean" },
             "fuel_limit_max": { "type": "number" },
-
             "allow_export": { "type": "boolean" },
             "line_capacity": { "type": "number" },
+
             "grid_cost": {
               "type": "object",
-              "properties": {
-                "timestep": {
-                  "type": "array",
-                  "items": { "type": "number" }
-                },
-                "season1": {
+              "minProperties": 1,
+              "patternProperties": {
+                ".*": {
                   "type": "array",
                   "items": { "type": "number" }
                 }
               },
-              "additionalProperties": {
-                "type": "array",
-                "items": { "type": "number" }
-              }
+              "additionalProperties": false
             },
             "grid_price": {
               "type": "object",
-              "properties": {
-                "timestep": {
+              "minProperties": 1,
+              "patternProperties": {
+                ".*": {
                   "type": "array",
                   "items": { "type": "number" }
                 }
               },
-              "additionalProperties": {
-                "type": "array",
-                "items": { "type": "number" }
-              }
+              "additionalProperties": false
             }
           }
         }
