@@ -29,7 +29,7 @@ function write_results_to_json(model::Model, tech_params::Dict, res_potential::D
     has_solar = enabled["solar_pv"]
     has_wind = enabled["wind_turbine"]
     has_battery = enabled["battery"]
-    has_generator = enabled["diesel_generator"]
+    has_diesel_generator = enabled["diesel_generator"]
     has_grid_connection = enabled["grid_connection"]
 
     grid_conf = get(system_config, "grid_connection", Dict())
@@ -53,62 +53,62 @@ function write_results_to_json(model::Model, tech_params::Dict, res_potential::D
     sizing = Dict()
     if has_solar
         solar_cap = res_potential["solar_pv"]["nominal_capacity"]
-        sizing["solar_kw"] = value(model[:solar_units]) * solar_cap
+        sizing["Solar Capacity (kW)"] = value(model[:solar_units]) * solar_cap
     end
     if has_wind
         wind_cap = res_potential["wind_turbine"]["nominal_capacity"]
-        sizing["wind_kw"] = value(model[:wind_units]) * wind_cap
+        sizing["Wind Capacity (kW)"] = value(model[:wind_units]) * wind_cap
     end
     if has_battery
         battery_cap = tech_params["technology_parameters"]["battery"]["nominal_capacity"]
-        sizing["battery_kwh"] = value(model[:battery_units]) * battery_cap
+        sizing["Battery Capacity (kWh)"] = value(model[:battery_units]) * battery_cap
     end
-    if has_generator
+    if has_diesel_generator
         generator_nominal_capacity = tech_params["technology_parameters"]["diesel_generator"]["nominal_capacity"]
-        sizing["generator_kw"] = value(model[:generator_units]) * generator_nominal_capacity
+        sizing["Generator Capacity (kW)"] = value(model[:generator_units]) * generator_nominal_capacity
     end
     results["sizing"] = sizing
 
     # === Costs ===
     results["costs"] = Dict(
-        "NPC[k$currency]" => round(value(model[:NPC]) / 1000, digits=2),
-        "CAPEX[k$currency]" => round(value(model[:CAPEX]) / 1000, digits=2),
-        "Subsidies[k$currency]" => round(value(model[:Subsidies]) / 1000, digits=2),
-        "Replacement[k$currency]" => round(value(model[:Replacement_Cost_npv]) / 1000, digits=2),
-        "OPEX[k$currency]" => round(value(model[:OPEX_npv]) / 1000, digits=2),
-        "Salvage[k$currency]" => round(value(model[:Salvage_npv]) / 1000, digits=2)
+        "Net Present Cost (k$currency)" => round(value(model[:NPC]) / 1000, digits=2),
+        "Investment Cost (k$currency)" => round(value(model[:CAPEX]) / 1000, digits=2),
+        "Subsidies (k$currency)" => round(value(model[:Subsidies]) / 1000, digits=2),
+        "Replacement Cost (k$currency)" => round(value(model[:Replacement_Cost_npv]) / 1000, digits=2),
+        "Fixed O&M Cost (k$currency)" => round(value(model[:OPEX_npv]) / 1000, digits=2),
+        "Salvage Value (k$currency)" => round(value(model[:Salvage_npv]) / 1000, digits=2)
     )
 
     # === LCOE ===
     actualized_demand = sum(sum(season_weights[s] * load[t, s] for t in 1:T, s in 1:num_seasons) * discount_factors[y] for y in 1:project_lifetime)
-    results["LCOE[$currency/kWh]"] = round(value(model[:NPC]) / actualized_demand, digits=3)
+    results["LCOE ($currency/kWh)"] = round(value(model[:NPC]) / actualized_demand, digits=3)
 
     # === Operation KPIs ===
     op = Dict()
     if has_solar
-        op["solar[MWh]"] = round(sum(season_weights[s] * value(model[:solar_production][t,s]) for t in 1:T, s in 1:num_seasons) / 1000, digits=2)
+        op["Total Annual Solar Production (MWh/year)"] = round(sum(season_weights[s] * value(model[:solar_production][t,s]) for t in 1:T, s in 1:num_seasons) / 1000, digits=2)
     end
     if has_wind
-        op["wind[MWh]"] = round(sum(season_weights[s] * value(model[:wind_production][t,s]) for t in 1:T, s in 1:num_seasons) / 1000, digits=2)
+        op["Total Annual Wind Production (MWh/year)"] = round(sum(season_weights[s] * value(model[:wind_production][t,s]) for t in 1:T, s in 1:num_seasons) / 1000, digits=2)
     end
     if has_generator
         fuel_lhv = tech_params["technology_parameters"]["diesel_generator"]["lower_heating_value"]
         gen = sum(season_weights[s] * value(model[:generator_production][t,s]) for t in 1:T, s in 1:num_seasons)
-        op["generator[MWh]"] = round(gen / 1000, digits=2)
-        op["fuel_liters"] = round(gen / fuel_lhv, digits=2)
+        op["Total Annual Diesel Generator Production (MWh/year)"] = round(gen / 1000, digits=2)
+        op["Total Annual Fuel Consumption (liters/year)"] = round(gen / fuel_lhv, digits=2)
     end
     if has_battery
         charge = sum(season_weights[s] * value(model[:battery_charge][t,s]) for t in 1:T, s in 1:num_seasons)
         discharge = sum(season_weights[s] * value(model[:battery_discharge][t,s]) for t in 1:T, s in 1:num_seasons)
-        op["battery_charge[MWh]"] = round(charge / 1000, digits=2)
-        op["battery_discharge[MWh]"] = round(discharge / 1000, digits=2)
+        op["Total Annual Battery Charge (MWh/year)"] = round(charge / 1000, digits=2)
+        op["Total Annual Battery Discharge (MWh/year)"] = round(discharge / 1000, digits=2)
     end
     if has_grid_connection
         grid_import = sum(season_weights[s] * value(model[:grid_import][t,s]) for t in 1:T, s in 1:num_seasons)
-        op["grid_import_[MWh]"] = round(grid_import / 1000, digits=2)
+        op["Total Annual Grid Import (MWh/year)"] = round(grid_import / 1000, digits=2)
         if allow_grid_export
             grid_export = sum(season_weights[s] * value(model[:grid_export][t,s]) for t in 1:T, s in 1:num_seasons)
-            op["grid_export[MWh]"] = round(grid_export / 1000, digits=2)
+            op["Total Annual Grid Export (MWh/year)"] = round(grid_export / 1000, digits=2)
         end
     end
     results["operation"] = op
@@ -116,18 +116,18 @@ function write_results_to_json(model::Model, tech_params::Dict, res_potential::D
     # === Dispatch (per season) ===
     dispatch = Dict{String, Any}()
     for s in 1:num_seasons
-        data = Dict("timestep" => collect(1:T), "load[kWh]" => load[:, s])
-        if has_solar data["solar[kWh]"] = value.(model[:solar_production])[:, s] end
-        if has_wind data["wind[kWh]"] = value.(model[:wind_production])[:, s] end
+        data = Dict("timestep" => collect(1:T), "Load Demand (kWh)" => load[:, s])
+        if has_solar data["Solar Production (kWh)"] = value.(model[:solar_production])[:, s] end
+        if has_wind data["Wind Production (kWh)"] = value.(model[:wind_production])[:, s] end
         if has_battery
-            data["charge[kWh]"] = value.(model[:battery_charge])[:, s]
-            data["discharge[kWh]"] = value.(model[:battery_discharge])[:, s]
-            data["soc[kWh]"] = value.(model[:SOC])[:, s]
+            data["Battery Charge (kWh)"] = value.(model[:battery_charge])[:, s]
+            data["Battery Discharge (kWh)"] = value.(model[:battery_discharge])[:, s]
+            data["State of Charge (kWh)"] = value.(model[:SOC])[:, s]
         end
-        if has_generator data["generator[kWh]"] = value.(model[:generator_production])[:, s] end
+        if has_generator data["Generator Production (kWh)"] = value.(model[:generator_production])[:, s] end
         if has_grid_connection
-            data["grid_import[kWh]"] = value.(model[:grid_import])[:, s]
-            if allow_grid_export data["grid_export[kWh]"] = value.(model[:grid_export])[:, s] end
+            data["Grid Import (kWh)"] = value.(model[:grid_import])[:, s]
+            if allow_grid_export data["Grid Export(kWh)"] = value.(model[:grid_export])[:, s] end
         end
         dispatch["season_$(s)"] = data
     end
