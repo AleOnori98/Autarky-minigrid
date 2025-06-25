@@ -102,34 +102,54 @@ function write_results_to_json(
 
     # === Dispatch
     dispatch = Dict{String, Any}()
-    for s in 1:num_seasons
-        data = Dict(
-            "timestep" => collect(1:T),
-            "Load Demand (kWh)" => load[:, s],
-            "Solar Production (kWh)" => fill(0.0, T),
-            "Battery Charge (kWh)" => fill(0.0, T),
-            "Battery Discharge (kWh)" => fill(0.0, T),
-            "State of Charge (kWh)" => fill(0.0, T),
-            "Generator Production (kWh)" => fill(0.0, T),
-            "Grid Import (kWh)" => fill(0.0, T),
-            "Grid Export (kWh)" => fill(0.0, T),
-            "Solar Curtailment (kWh)" => fill(0.0, T),
-            "Lost Load (kWh)" => fill(0.0, T)
-        )
-        if has_solar data["Solar Production (kWh)"] = value.(model[:solar_production])[:, s] end
-        if has_battery
-            data["Battery Charge (kWh)"] = value.(model[:battery_charge])[:, s]
-            data["Battery Discharge (kWh)"] = value.(model[:battery_discharge])[:, s]
-            data["State of Charge (kWh)"] = value.(model[:SOC])[:, s]
+    # TODO: Adjust the frontend to handle also 2 seasons
+    for s in 1:4  # Always loop from 1 to 4 
+        if s <= num_seasons
+            # Real season data
+            data = Dict(
+                "timestep" => collect(1:T),
+                "Load Demand (kWh)" => load[:, s],
+                "Solar Production (kWh)" => fill(0.0, T),
+                "Battery Charge (kWh)" => fill(0.0, T),
+                "Battery Discharge (kWh)" => fill(0.0, T),
+                "State of Charge (kWh)" => fill(0.0, T),
+                "Generator Production (kWh)" => fill(0.0, T),
+                "Grid Import (kWh)" => fill(0.0, T),
+                "Grid Export (kWh)" => fill(0.0, T),
+                "Solar Curtailment (kWh)" => fill(0.0, T),
+                "Lost Load (kWh)" => fill(0.0, T)
+            )
+            if has_solar data["Solar Production (kWh)"] = value.(model[:solar_production])[:, s] end
+            if has_battery
+                data["Battery Charge (kWh)"] = value.(model[:battery_charge])[:, s]
+                data["Battery Discharge (kWh)"] = value.(model[:battery_discharge])[:, s]
+                data["State of Charge (kWh)"] = value.(model[:SOC])[:, s]
+            end
+            if has_generator data["Generator Production (kWh)"] = value.(model[:generator_production])[:, s] end
+            if has_grid
+                data["Grid Import (kWh)"] = value.(model[:grid_import])[:, s]
+                if allow_export data["Grid Export (kWh)"] = value.(model[:grid_export])[:, s] end
+            end
+            dispatch["season_$(s)"] = data
+        else
+            # Dummy season data
+            dispatch["season_$(s)"] = Dict(
+                "timestep" => collect(1:T),
+                "Load Demand (kWh)" => fill(0.0, T),
+                "Solar Production (kWh)" => fill(0.0, T),
+                "Battery Charge (kWh)" => fill(0.0, T),
+                "Battery Discharge (kWh)" => fill(0.0, T),
+                "State of Charge (kWh)" => fill(0.0, T),
+                "Generator Production (kWh)" => fill(0.0, T),
+                "Grid Import (kWh)" => fill(0.0, T),
+                "Grid Export (kWh)" => fill(0.0, T),
+                "Solar Curtailment (kWh)" => fill(0.0, T),
+                "Lost Load (kWh)" => fill(0.0, T)
+            )
         end
-        if has_generator data["Generator Production (kWh)"] = value.(model[:generator_production])[:, s] end
-        if has_grid
-            data["Grid Import (kWh)"] = value.(model[:grid_import])[:, s]
-            if allow_export data["Grid Export (kWh)"] = value.(model[:grid_export])[:, s] end
-        end
-        dispatch["season_$(s)"] = data
     end
     results["dispatch"] = dispatch
+
 
     # === Save ===
     results_path = joinpath("projects", project_id, "results", "results.json")
