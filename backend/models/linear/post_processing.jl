@@ -31,7 +31,11 @@ function write_results_to_json(
     has_battery = enabled["battery"]
     has_generator = enabled["diesel_generator"]
     has_grid = enabled["grid_connection"]
-    allow_export = get(system_config["grid_connection"], "allow_export", false)
+    if has_grid
+        allow_export = get(system_config["grid_connection"], "allow_export", false)
+    else
+        allow_export = false
+    end
 
     project_settings = project_setup["project_settings"]
     project_lifetime = project_settings["time_horizon"]
