@@ -1,4 +1,0 @@
-solar_pv:
-  inverter_efficiency: 0.95
-  component_name: "CS3U-350MS"
-  nominal_capacity: 1
