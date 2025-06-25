@@ -84,7 +84,7 @@ function run_model_async(project_id::String, solver::String, settings::Dict)
                 log_line(log_io, sprint(showerror, err_outer))
             end
         catch
-            @warn "⚠ Unable to write fallback status or logs for $project_id"
+            @warn "Unable to write fallback status or logs for $project_id"
         end
     end
 end
