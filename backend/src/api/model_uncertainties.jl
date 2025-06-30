@@ -12,28 +12,25 @@ using .RequestHandlerUtils: handle_post_request
 """
     model_uncertainties_handler(req::HTTP.Request) -> HTTP.Response
 
-Handles uncertainty configuration inputs from the frontend. Supports:
-- Formulation: "linear", "expected_values", "probabilistic"
-- Grid outage settings (optional if grid is not connected)
+Handles uncertainty configuration inputs from the frontend.
+
+Supports:
+- Formulation: "linear", "expected_values", "icc", "jcc"
+- Optional grid outage matrix upload (linear only)
 - Forecast error profiles (load and renewables)
 - Probabilistic config: ICC/JCC toggle and islanding probability
 
-# Input JSON structure:
+# Example Input JSON:
 {
   "project_id": "abc123",
-  "formulation": "linear",  # or "expected_values", "icc", "jcc"
-  "grid_connected": true,   # or false
+  "formulation": "linear",
+  "grid_connected": true,
   "grid_outage_settings": {
-    "availability_matrix": [[1, 0], [0, 1]],  # Example matrix
-    "outage_probability": 0.1
-  },
-  "forecast_errors": {
-    "solar_pv": [0.05, 0.07, ...],
-    "wind_turbine": [0.03, 0.04, ...]
-  },
-  "probabilistic_config": {
-    "icc_enabled": true,
-    "islanding_probability": 0.2
+    "availability_matrix": {
+      "timestep": [...],
+      "winter": [...],
+      "summer": [...]
+    }
   }
 }
 """
@@ -51,22 +48,15 @@ function model_uncertainties_handler(req)
                 "grid_connected" => grid_connected
             )
 
-            # Initialize file paths for saved files
             saved_files = String[]
 
-            # Linear formulation does not require forecast errors or probabilistic config
             if formulation == "linear"
-                if grid_connected
-                    grid_settings = data[:grid_outage_settings]
-                    yaml_content["grid_outage_settings"] = Dict(
-                        "avg_outages_per_year" => grid_settings[:avg_outages_per_year],
-                        "avg_outage_duration" => grid_settings[:avg_outage_duration]
-                    )
-                    save_availability_matrix_csv(project_id, Dict(grid_settings[:availability_matrix]))
+                if grid_connected && haskey(data[:grid_outage_settings], :availability_matrix)
+                    matrix = Dict(data[:grid_outage_settings][:availability_matrix])
+                    save_availability_matrix_csv(project_id, matrix)
                     push!(saved_files, "projects/$project_id/time_series/grid_availability_matrix.csv")
                 end
-            
-            # Expected values formulation requires forecast errors
+
             elseif formulation == "expected_values"
                 forecast_errors = data[:forecast_errors]
                 yaml_content["forecast_errors"] = Dict()
@@ -78,11 +68,9 @@ function model_uncertainties_handler(req)
                 end
 
                 if grid_connected
-                    grid_settings = data[:grid_outage_settings]
-                    yaml_content["grid_outage_settings"] = grid_settings
+                    yaml_content["grid_outage_settings"] = data[:grid_outage_settings]
                 end
 
-            # Probabilistic formulation requires forecast errors and probabilistic config
             elseif formulation in ["icc", "jcc"]
                 forecast_errors = data[:forecast_errors]
                 yaml_content["forecast_errors"] = Dict()
@@ -94,8 +82,7 @@ function model_uncertainties_handler(req)
                 end
 
                 if grid_connected
-                    grid_settings = data[:grid_outage_settings]
-                    yaml_content["grid_outage_settings"] = grid_settings
+                    yaml_content["grid_outage_settings"] = data[:grid_outage_settings]
                     yaml_content["probabilistic_config"] = data[:probabilistic_config]
                 end
 

@@ -1,15 +1,47 @@
 {
   "title": "Technology Parameters Schema",
   "type": "object",
-  "required": ["project_id", "economic_settings", "technology_parameters"],
+  "required": [
+    "project_id",
+    "economic_settings",
+    "system_constraints",
+    "technology_parameters"
+  ],
   "properties": {
-    "project_id": { "type": "string" },
+    "project_id": {
+      "type": "string"
+    },
     "economic_settings": {
       "type": "object",
       "required": ["discount_rate", "currency"],
       "properties": {
-        "discount_rate": { "type": "number", "minimum": 0 },
-        "currency": { "type": "string", "minLength": 1 }
+        "discount_rate": {
+          "type": "number",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "system_constraints": {
+      "type": "object",
+      "required": [
+        "maximum_lost_load",
+        "minimum_renewable_penetration"
+      ],
+      "properties": {
+        "maximum_lost_load": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "minimum_renewable_penetration": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
       }
     },
     "technology_parameters": {
@@ -39,7 +71,6 @@
             "fuel_limit_max": { "type": "number" },
             "allow_export": { "type": "boolean" },
             "line_capacity": { "type": "number" },
-
             "grid_cost": {
               "type": "object",
               "minProperties": 1,
