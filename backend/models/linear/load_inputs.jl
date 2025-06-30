@@ -138,7 +138,6 @@ if has_wind
     unused_wind_life = wind_lifetime - (project_lifetime - last_install_wind)
     salvage_wind_fraction = max(0, unused_wind_life / wind_lifetime)
 end
-# TODO: Add support for unit committment
 # TODO: Implement download from PVGIS and pre-processing of wind_power
 
 # Mini-Hydro
@@ -160,7 +159,6 @@ if has_mini_hydro
     unused_hydro_life = hydro_lifetime - (project_lifetime - last_install_hydro)
     salvage_hydro_fraction = max(0, unused_hydro_life / hydro_lifetime)
 end
-# TODO: Add support for unit committment
 
 # Battery
 if has_battery
@@ -186,7 +184,6 @@ if has_battery
     unused_battery_life = battery_lifetime - (project_lifetime - last_install_battery)  
     salvage_battery_fraction = max(0, unused_battery_life / battery_lifetime)
 end
-# TODO: Add support for unit committment
 
 # Diesel Generator
 if has_diesel_generator
@@ -208,11 +205,30 @@ if has_diesel_generator
     unused_generator_life = generator_lifetime - (project_lifetime - last_install_generator)
     salvage_generator_fraction = max(0, unused_generator_life / generator_lifetime)
 end
-# TODO: Add support for unit committment
 
 
-# TODO: Add similar block for biogas generator
+# Biogas Generator
+if has_biogas_generator
+    biogas = tech_params["technology_parameters"]["biogas_generator"]
+    biogas_nominal_capacity = biogas["nominal_capacity"]
+    biogas_efficiency = biogas["nominal_efficiency"] / 100
+    biogas_capex = biogas["investment_cost"]
+    biogas_opex = biogas["operation_cost"] / 100
+    biogas_lifetime = biogas["lifetime"]
+    biogas_fuel_lhv = biogas["lower_heating_value"]
+    biogas_fuel_cost = biogas["fuel_cost"]
 
+    # Calculate number of replacements
+    biogas_replacements = max(0, floor((project_lifetime - 1) / biogas_lifetime))
+    # Build arrays of valid replacement times (in whole years), up to project_lifetime - 1 ensuring not to index discount_factor past the end.
+    biogas_replacement_years = biogas_lifetime : biogas_lifetime : Int(floor((project_lifetime - 1) / biogas_lifetime) * biogas_lifetime)
+    # Calculate the salvage fractions based on the last replacement year
+    last_install_biogas = length(biogas_replacement_years) == 0 ? 0 : maximum(biogas_replacement_years)
+    unused_biogas_life = biogas_lifetime - (project_lifetime - last_install_biogas)
+    salvage_biogas_fraction = max(0, unused_biogas_life / biogas_lifetime)
+end
+
+# Grid Connection
 if has_grid_connection
     grid = tech_params["technology_parameters"]["grid_connection"] # Dict
     allow_grid_export = grid["allow_export"] # bool
@@ -239,4 +255,7 @@ end
 
 # TODO: Implement logic for inverter efficiency and losses <--> layout_id
 
-# TODO: Add parameters for optimization settings (lost load, res penetration, etc.)
+# Extract system-level constraints
+system_constraints = tech_params["system_constraints"]
+maximum_lost_load = system_constraints["maximum_lost_load"] / 100  # store as fraction 0–1
+minimum_res_penetration = system_constraints["minimum_renewable_penetration"] / 100  # store as fraction 0–1
