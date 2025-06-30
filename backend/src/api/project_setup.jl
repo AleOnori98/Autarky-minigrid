@@ -27,7 +27,7 @@ against a schema, generates a unique `project_id`, stores the data in a YAML fil
   "time_resolution": "hourly",
   "seasonality_enabled": true,
   "seasonality_option": "4 seasons"
-  "typical_profile": "day",
+  "operation_time_steps": 24,
 }
 
 # Success Response:

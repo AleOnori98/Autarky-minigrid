@@ -51,7 +51,7 @@ function save_project_setup(project_id::String, data::Dict)
             "time_resolution" => data[:time_resolution],
             "seasonality" => data[:seasonality_enabled],
             "seasonality_option" => data[:seasonality_option],
-            "typical_profile" => data[:typical_profile]
+            "operation_time_steps" => data[:operation_time_steps]
         )
     )
     save_yaml_data(project_id, "project_setup.yaml", yaml_content)

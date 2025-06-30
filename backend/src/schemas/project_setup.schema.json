@@ -9,7 +9,7 @@
     "time_resolution",
     "seasonality_enabled",
     "seasonality_option",
-    "typical_profile"
+    "operation_time_steps"
   ],
   "properties": {
     "project_name": { "type": "string" },
@@ -26,6 +26,6 @@
     "time_resolution": { "type": "string" },
     "seasonality_enabled": { "type": "boolean" },
     "seasonality_option": { "type": "string" },
-    "typical_profile": { "type": "string" }
+    "operation_time_steps": { "type": "integer", "minimum": 24 }
   }
 }

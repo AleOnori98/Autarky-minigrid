@@ -25,7 +25,7 @@ is_fully_ac = enabled["fully_ac"] # bool
 layout_id = system_config["layout_id"] # int
 has_seasonality = project_setup["project_settings"]["seasonality"] # bool
 seasonality_option = project_setup["project_settings"]["seasonality_option"] # string
-typical_profile = project_setup["project_settings"]["typical_profile"] # string
+operation_time_steps = project_setup["project_settings"]["operation_time_steps"] # int
 
 # Extract project setup settings
 project_settings = project_setup["project_settings"] # Dict
@@ -46,46 +46,50 @@ else
     error("Unsupported time resolution: $time_resolution")
 end
 
-# Define total number of hours in a year and scaling factor
-annual_hours = 8760
-if typical_profile == "day"
-    operation_time_steps = 24 
-end
-# TODO: Add support for other operation time steps if needed
-
 # Calculate the year scale factor based on operation time steps
-year_scale_factor = annual_hours / operation_time_steps  
+annual_hours = 8760 # Total hours in a year (365 days) 
 
-# Define season_weights based on seasonality
+# Validate operation_time_steps based on seasonality
+# TODO: Add support for different time resolution 
 if has_seasonality
-    if seasonality_option == "4 seasons"
-        num_seasons = 4
-        # Standard winter, spring, summer, fall mapping (3 months each)
-        season_months = Dict(
-            1 => [12, 1, 2],   # Winter
-            2 => [3, 4, 5],    # Spring
-            3 => [6, 7, 8],    # Summer
-            4 => [9, 10, 11]   # Fall
-        )
-    elseif seasonality_option == "2 seasons"
+    if seasonality_option == "2 seasons"
         num_seasons = 2
-        # Typical tropical: dry and wet
+        max_steps = 4380
         season_months = Dict(
-            1 => [11, 12, 1, 2, 3],  # Dry season
-            2 => [4, 5, 6, 7, 8, 9, 10]  # Wet season
+            1 => [11, 12, 1, 2, 3],  # Dry (5 months)
+            2 => [4, 5, 6, 7, 8, 9, 10]  # Wet (7 months)
+        )
+    elseif seasonality_option == "4 seasons"
+        num_seasons = 4
+        max_steps = 2190
+        season_months = Dict(
+            1 => [12, 1, 2],   # Winter (3 months)
+            2 => [3, 4, 5],    # Spring (3 months)
+            3 => [6, 7, 8],    # Summer (3 months)
+            4 => [9, 10, 11]   # Fall (3 months)
         )
     else
-        error("Unsupported seasonality_option: $seasonality_option")
+        error("Unsupported seasonality option: $seasonality_option")
     end
-
-    # Compute seasonal weights as fraction of the year scaled to operation_time_steps
-    season_weights = Dict(
-        s => (length(season_months[s]) / 12.0) * year_scale_factor for s in keys(season_months)
-    )
+    if operation_time_steps > max_steps
+        error("operation_time_steps exceeds max allowed $max_steps for $seasonality_option")
+    end
 else
     num_seasons = 1
-    # No seasonality → use one season with full weight
-    season_weights = Dict(1 => 1.0 * year_scale_factor)
+    max_steps = 8760
+    season_months = Dict(1 => [1:12;])
+    if operation_time_steps > max_steps
+        error("operation_time_steps exceeds max allowed 8760 for no seasonality")
+    end
+end
+
+# Calculate the number of time steps per season
+season_weights = Dict{Int, Float64}()
+
+for (s, months) in season_months
+    hours_in_season = (length(months) / 12.0) * annual_hours
+    weight_per_step = hours_in_season / operation_time_steps
+    season_weights[s] = weight_per_step
 end
 
 # Load Demand time series from CSV file
