@@ -14,26 +14,38 @@ using .RequestHandlerUtils: handle_post_request
 """
     technology_parameters_handler(req::HTTP.Request) -> HTTP.Response
 
-Handles POST requests to store technology parameters and economic settings
-for a project. Data is validated against a schema and saved to YAML.
+Handles POST requests to store technology parameters, economic settings,
+and system-level constraints for a project. Data is validated against a JSON schema 
+and saved to YAML. If grid connection data includes time series, the backend 
+saves the corresponding CSV files under the project folder.
 
 # Expected Input JSON:
 {
   "project_id": "abc123",
-  "project_economic_settings": {
+  "economic_settings": {
     "discount_rate": 6.5,
     "currency": "USD"
+  },
+  "system_constraints": {
+    "maximum_lost_load": 5.0,
+    "minimum_renewable_penetration": 70.0
   },
   "technology_parameters": {
     "solar_pv": { ... },
     "battery": { ... },
-    "diesel_generator": { ... }
+    "diesel_generator": { ... },
+    "grid_connection": {
+      "allow_export": true,
+      "line_capacity": 100.0,
+      "grid_cost": { "timestep": [...], "winter": [...], ... },
+      "grid_price": { "timestep": [...], "winter": [...], ... }
+    }
   }
 }
 
 # Returns:
-- On success: status, message, project_id
-- On error: status, message
+- On success: Dict with status, message, project_id, file_paths
+- On error: Dict with status, message
 """
 function technology_parameters_handler(req)
     return handle_post_request(
@@ -44,21 +56,19 @@ function technology_parameters_handler(req)
             tech_params = Dict(string(k) => v for (k, v) in data[:technology_parameters])
             file_paths = ["projects/$project_id/technology_parameters.yaml"]
 
-            # Save YAML with tech + economic settings
+            # Save YAML with economic settings + system constraints + tech parameters
             save_technology_parameters(project_id, Dict(data))
 
-            # Check if grid_connection component exists
+            # If grid connection is provided, save cost/price CSVs
             if haskey(tech_params, "grid_connection")
                 grid_data = tech_params["grid_connection"]
 
-                # Parse and save grid cost CSV
                 if haskey(grid_data, "grid_cost")
-                    grid_cost = Dict(grid_data["grid_cost"]) 
+                    grid_cost = Dict(grid_data["grid_cost"])
                     save_grid_cost_csv(project_id, grid_cost)
                     push!(file_paths, "projects/$project_id/time_series/grid_cost.csv")
                 end
 
-                # Optional: grid price time series
                 if get(grid_data, "grid_prices", nothing) !== nothing
                     grid_price = Dict(grid_data["grid_prices"])
                     save_grid_price_csv(project_id, grid_price)
