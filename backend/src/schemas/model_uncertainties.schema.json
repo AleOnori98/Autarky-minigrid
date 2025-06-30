@@ -3,14 +3,18 @@
   "type": "object",
   "required": ["project_id", "formulation", "grid_connected"],
   "properties": {
-    "project_id": { "type": "string" },
+    "project_id": {
+      "type": "string"
+    },
 
     "formulation": {
       "type": "string",
       "enum": ["linear", "expected_values", "icc", "jcc"]
     },
 
-    "grid_connected": { "type": "boolean" },
+    "grid_connected": {
+      "type": "boolean"
+    },
 
     "grid_outage_settings": {
       "type": "object",
@@ -25,6 +29,14 @@
             }
           },
           "additionalProperties": false
+        },
+        "avg_outages_per_year": {
+          "type": "number",
+          "minimum": 0
+        },
+        "avg_outage_duration": {
+          "type": "number",
+          "minimum": 0
         }
       },
       "additionalProperties": false
@@ -49,13 +61,21 @@
 
     "probabilistic_config": {
       "type": "object",
-      "required": ["type", "probability_of_islanding"],
       "properties": {
         "type": {
           "type": "string",
           "enum": ["ICC", "JCC"]
         },
-        "probability_of_islanding": {
+        "outage_duration": {
+          "type": "number",
+          "minimum": 0
+        },
+        "outage_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "islanding_probability": {
           "type": "number",
           "minimum": 0,
           "maximum": 1
