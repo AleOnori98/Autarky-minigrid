@@ -258,4 +258,4 @@ end
 # Extract system-level constraints
 system_constraints = tech_params["system_constraints"]
 maximum_lost_load = system_constraints["maximum_lost_load"] / 100  # store as fraction 0–1
-minimum_res_penetration = system_constraints["minimum_renewable_penetration"] / 100  # store as fraction 0–1
+minimum_renewable_penetration = system_constraints["minimum_renewable_penetration"] / 100  # store as fraction 0–1

@@ -41,6 +41,7 @@ model = Model()
 # ========================
 # VARIABLES DEFINITION
 # ========================
+# TODO: Add support for unit committment
 
 # Solar PV variables
 if has_solar == true
@@ -49,7 +50,6 @@ if has_solar == true
     # Operation
     @variable(model, solar_production[t=1:T, s=1:S] >= 0, base_name="Solar_Production") # [kWh]
 end
-# TODO: Add support for unit committment
 
 # Wind Turbine variables
 if has_wind == true
@@ -58,7 +58,14 @@ if has_wind == true
     # Operation
     @variable(model, wind_production[t=1:T, s=1:S] >= 0, base_name="Wind_Production") # [kWh]
 end
-# TODO: Add support for unit committment
+
+# Mini-Hydro variables
+if has_mini_hydro == true
+    # Sizing
+    @variable(model, hydro_units >= 0, base_name="MiniHydro_Units") # [units of nominal capacity]
+    # Operation
+    @variable(model, hydro_production[t=1:T, s=1:S] >= 0, base_name="MiniHydro_Production") # [kWh]
+end
 
 # Battery variables
 if has_battery == true
@@ -69,7 +76,6 @@ if has_battery == true
     @variable(model, battery_discharge[t=1:T, s=1:S] >= 0, base_name="Battery_Discharge") # [kWh]
     @variable(model, SOC[t=1:T, s=1:S], base_name="State_of_Charge") # [kWh]
 end
-# TODO: Add support for unit committment
 
 # Backup Diesel Generator variables
 if has_diesel_generator == true
@@ -78,11 +84,14 @@ if has_diesel_generator == true
     # Operation
     @variable(model, generator_production[t=1:T, s=1:S] >= 0, base_name="Generator_Production") # [kWh]
 end
-# TODO: Add support for unit committment
 
-# TODO: Add support for Mini-Hydro and Biogas generator
-
-# TODO: Add support for Lost Load variable
+# Biogas Generator variables
+if has_biogas_generator == true
+    # Sizing
+    @variable(model, biogas_units >= 0, base_name="BiogasGenerator_Units") # [units of nominal capacity]
+    # Operation
+    @variable(model, biogas_production[t=1:T, s=1:S] >= 0, base_name="BiogasGenerator_Production") # [kWh]
+end
 
 # Grid Connection variables
 if has_grid_connection == true
@@ -90,6 +99,11 @@ if has_grid_connection == true
     if allow_grid_export == true 
         @variable(model, grid_export[t=1:T, s=1:S] >= 0, base_name="Grid_Export") # [kWh]
     end
+end
+
+# Lost Load variables
+if maximum_lost_load > 0.0
+    @variable(model, lost_load[t=1:T, s=1:S] >= 0, base_name="Lost_Load") # [kWh]
 end
 
 println("Variables added successfully to the model.")
@@ -103,18 +117,24 @@ for s in 1:S
         # Initialize the energy balance expression
         energy_balance_expr = AffExpr()
 
-        # Add the energy production/consumption terms
+        # Add production terms based on available technologies
         if has_solar
             energy_balance_expr += solar_production[t, s]
         end
         if has_wind
             energy_balance_expr += wind_production[t, s]
         end
-        if has_battery
-            energy_balance_expr += battery_discharge[t, s] - battery_charge[t, s]
+        if has_mini_hydro
+            energy_balance_expr += hydro_production[t, s]
+        end
+        if has_biogas_generator
+            energy_balance_expr += biogas_production[t, s]
         end
         if has_diesel_generator
             energy_balance_expr += generator_production[t, s]
+        end
+        if has_battery
+            energy_balance_expr += battery_discharge[t, s] - battery_charge[t, s]
         end
         if has_grid_connection
             energy_balance_expr += grid_import[t, s]
@@ -123,9 +143,12 @@ for s in 1:S
             end
         end
 
-        # TODO: Add support for Mini-Hydro, Biogas generator and Lost Load
+        # Add Lost Load if used 
+        if maximum_lost_load > 0.0
+            energy_balance_expr += lost_load[t, s]
+        end
 
-        # Apply constraint for each time step and season
+        # Constrain supply to meet demand 
         @constraint(model, energy_balance_expr == load[t, s])
     end
 end
@@ -136,7 +159,7 @@ println("Energy Balance Constraint added successfully.")
 # OPERATION CONSTRAINTS
 # ===============================
 
-# Technology-specific constraints
+# Renewables capacity limit
 if has_solar == true
     @constraint(model, [t=1:T, s=1:S], solar_production[t,s] <= solar_units * solar_unit_production[t,s])
 end
@@ -145,8 +168,11 @@ if has_wind == true
     @constraint(model, [t=1:T, s=1:S], wind_production[t,s] <= wind_units * wind_power[t,s])
 end
 
-# TODO: Add support for Mini-Hydro and Biogas generator
+if has_mini_hydro == true
+    @constraint(model, [t=1:T, s=1:S], hydro_production[t,s] <= hydro_units * hydro_unit_production[t,s])
+end
 
+# Battery capacity limit
 if has_battery == true
     @constraint(model, [t=1:T, s=1:S], battery_charge[t,s] <= ((battery_units * battery_nominal_capacity) / t_charge) * Δt)
     @constraint(model, [t=1:T, s=1:S], battery_discharge[t,s] <= ((battery_units * battery_nominal_capacity) / t_discharge) * Δt)
@@ -159,10 +185,14 @@ if has_battery == true
     @constraint(model, [s=1:S], SOC[T, s] == SOC_0 * (battery_units * battery_nominal_capacity))  # End-of-horizon SOC continuity
 end
 
-# Generator Capacity Limit (if applicable)
+# Generators Capacity Limit 
 if has_diesel_generator == true
     @constraint(model, [t=1:T, s=1:S], generator_production[t,s] <= generator_units * generator_nominal_capacity * Δt)
  end
+
+ if has_biogas_generator == true
+    @constraint(model, [t=1:T, s=1:S], biogas_production[t,s] <= biogas_units * biogas_nominal_capacity * Δt)
+end
 
  # Grid Connection Operation constraints
 if has_grid_connection == true
@@ -173,6 +203,72 @@ if has_grid_connection == true
 end
 
 println("Operation Constraints added successfully to the model.")
+
+# ===============================
+# SYSTEM-LEVEL CONSTRAINTS
+# ===============================
+
+# -------------------------------
+# LOST LOAD SHARE CONSTRAINT
+# -------------------------------
+if maximum_lost_load > 0.0
+    # Weighted lost load across seasons must be <= allowed fraction of total demand
+    @constraint(model,
+        sum(season_weights[s] * sum(lost_load[t, s] for t in 1:T) for s in 1:S)
+        <= maximum_lost_load * sum(season_weights[s] * sum(load[t, s] for t in 1:T) for s in 1:S)
+    )
+end
+
+# -------------------------------
+# RENEWABLE PENETRATION CONSTRAINT
+# -------------------------------
+if minimum_renewable_penetration > 0.0
+    # Build expressions for total renewables & total generation
+    total_renewable_expr = Dict((t, s) => AffExpr() for t in 1:T, s in 1:S)
+    total_generation_expr = Dict((t, s) => AffExpr() for t in 1:T, s in 1:S)
+
+    for s in 1:S
+        for t in 1:T
+            if has_solar
+                total_renewable_expr[t, s] += solar_production[t, s]
+                total_generation_expr[t, s] += solar_production[t, s]
+            end
+            if has_wind
+                total_renewable_expr[t, s] += wind_production[t, s]
+                total_generation_expr[t, s] += wind_production[t, s]
+            end
+            if has_mini_hydro
+                total_renewable_expr[t, s] += hydro_production[t, s]
+                total_generation_expr[t, s] += hydro_production[t, s]
+            end
+            if has_diesel_generator
+                total_generation_expr[t, s] += generator_production[t, s]
+            end
+            if has_biogas_generator
+                total_generation_expr[t, s] += biogas_production[t, s]
+            end
+            if has_grid_connection
+                total_generation_expr[t, s] += grid_import[t, s]
+                if allow_grid_export
+                    total_generation_expr[t, s] += -grid_export[t, s]  # exported power reduces net supply
+                end
+            end
+            if has_battery
+                # Battery discharge counts as generation, charge counts as negative supply
+                total_generation_expr[t, s] += battery_discharge[t, s] - battery_charge[t, s]
+            end
+        end
+    end
+
+    # Weighted annual sums
+    annual_renewable = sum(season_weights[s] * sum(total_renewable_expr[t, s] for t in 1:T) for s in 1:S)
+    annual_total_gen = sum(season_weights[s] * sum(total_generation_expr[t, s] for t in 1:T) for s in 1:S)
+
+    # Enforce minimum RES share
+    @constraint(model, annual_renewable >= minimum_renewable_penetration * annual_total_gen)
+end
+
+println("System-level constraints added successfully to the model.")
 
 # ========================
 # COST EXPRESSIONS
@@ -186,7 +282,7 @@ OPEX_fixed_expr = 0
 OPEX_variable_expr = [AffExpr() for t in 1:T, s in 1:S]
 Salvage_expr = 0
 
-# Add technology costs conditionally
+# Solar PV
 if has_solar == true
     CAPEX_expr += (solar_units * solar_nominal_capacity) * solar_capex
     Replacement_Cost_npv_expr += sum(((solar_units * solar_nominal_capacity * solar_capex) * discount_factor[y]) for y in solar_replacement_years; init=0)
@@ -195,6 +291,7 @@ if has_solar == true
     Salvage_expr += ((solar_units * solar_nominal_capacity) * solar_capex) * salvage_solar_fraction
 end
 
+# Wind Turbine
 if has_wind == true
     CAPEX_expr += (wind_units * wind_nominal_capacity) * wind_capex
     Replacement_Cost_npv_expr += sum(((wind_units * wind_nominal_capacity * wind_capex) * discount_factor[y]) for y in wind_replacement_years; init=0)
@@ -203,6 +300,16 @@ if has_wind == true
     Salvage_expr += ((wind_units * wind_nominal_capacity) * wind_capex) * salvage_wind_fraction
 end
 
+# Mini-Hydro
+if has_mini_hydro == true
+    CAPEX_expr += (hydro_units * hydro_nominal_capacity) * hydro_capex
+    Replacement_Cost_npv_expr += sum(((hydro_units * hydro_nominal_capacity * hydro_capex) * discount_factor[y]) for y in hydro_replacement_years; init=0)
+    Subsidies_expr += ((hydro_units * hydro_nominal_capacity) * hydro_capex) * hydro_subsidy_share
+    OPEX_fixed_expr += ((hydro_units * hydro_nominal_capacity) * hydro_capex) * hydro_opex
+    Salvage_expr += ((hydro_units * hydro_nominal_capacity) * hydro_capex) * salvage_hydro_fraction
+end
+
+# Battery
 if has_battery == true
     CAPEX_expr += (battery_units * battery_nominal_capacity) * battery_capex
     Replacement_Cost_npv_expr += sum(((battery_units * battery_nominal_capacity * battery_capex) * discount_factor[y]) for y in battery_replacement_years; init=0)
@@ -210,11 +317,20 @@ if has_battery == true
     Salvage_expr += ((battery_units * battery_nominal_capacity) * battery_capex) * salvage_battery_fraction
 end
 
+# Diesel Generator
 if has_diesel_generator == true
     CAPEX_expr += (generator_units * generator_nominal_capacity) * generator_capex
     Replacement_Cost_npv_expr += sum(((generator_units * generator_nominal_capacity * generator_capex) * discount_factor[y]) for y in generator_replacement_years; init=0)
     OPEX_fixed_expr += ((generator_units * generator_nominal_capacity) * generator_capex) * generator_opex
     Salvage_expr += ((generator_units * generator_nominal_capacity) * generator_capex) * salvage_generator_fraction
+end
+
+# Biogas Generator
+if has_biogas_generator == true
+    CAPEX_expr += (biogas_units * biogas_nominal_capacity) * biogas_capex
+    Replacement_Cost_npv_expr += sum(((biogas_units * biogas_nominal_capacity * biogas_capex) * discount_factor[y]) for y in biogas_replacement_years; init=0)
+    OPEX_fixed_expr += ((biogas_units * biogas_nominal_capacity) * biogas_capex) * biogas_opex
+    Salvage_expr += ((biogas_units * biogas_nominal_capacity) * biogas_capex) * salvage_biogas_fraction
 end
 
 # Grid-related operational costs
@@ -235,6 +351,15 @@ if has_diesel_generator
         for t in 1:T
             # Use fuel consumption for fuel cost calculation
             OPEX_variable_expr[t, s] += (generator_production[t, s] / (generator_efficiency * fuel_lhv)) * fuel_cost
+        end
+    end
+end
+
+# Biogas Generator fuel cost
+if has_biogas_generator
+    for s in 1:S
+        for t in 1:T
+            OPEX_variable_expr[t, s] += (biogas_production[t, s] / (biogas_efficiency * biogas_fuel_lhv)) * biogas_fuel_cost
         end
     end
 end
