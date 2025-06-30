@@ -79,7 +79,8 @@ end
 """
     save_technology_parameters(project_id::String, data::Dict)
 
-Processes and saves all project-wide economic settings and technology-specific parameters
+Processes and saves all project-wide economic settings,
+system constraints and technology-specific parameters
 to technology_parameters.yaml.
 """
 function save_technology_parameters(project_id::String, data::Dict)
@@ -88,11 +89,13 @@ function save_technology_parameters(project_id::String, data::Dict)
 
     yaml_content = Dict(
         "economic_settings" => data[:economic_settings],
+        "system_constraints" => data[:system_constraints],
         "technology_parameters" => data[:technology_parameters]
     )
 
     save_yaml_data(project_id, "technology_parameters.yaml", yaml_content)
 end
+
 
 """
     save_renewables_technical_yaml(project_id::String, technology::String, parameters::Dict)
