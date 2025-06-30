@@ -1,0 +1,23 @@
+{
+  "title": "Simulate Grid Availability Schema",
+  "type": "object",
+  "required": [
+    "project_id",
+    "avg_outages_per_year",
+    "avg_outage_duration"
+  ],
+  "properties": {
+    "project_id": {
+      "type": "string"
+    },
+    "avg_outages_per_year": {
+      "type": "number",
+      "minimum": 0
+    },
+    "avg_outage_duration": {
+      "type": "number",
+      "minimum": 0
+    }
+  },
+  "additionalProperties": false
+}

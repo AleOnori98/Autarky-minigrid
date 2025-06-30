@@ -15,6 +15,7 @@ const SCHEMA_PATHS = Dict(
     "load_demand" => "src/schemas/load_demand.schema.json",
     "renewables_potential" => "src/schemas/renewables_potential.schema.json",
     "model_uncertainties" => "src/schemas/model_uncertainties.schema.json",
+    "grid_availability" => "src/schemas/grid_availability.schema.json",
     "model_optimize" => "src/schemas/model_optimize.schema.json",
 )
 

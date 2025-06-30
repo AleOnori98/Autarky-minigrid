@@ -18,6 +18,7 @@ include("src/api/technology_parameters.jl")
 include("src/api/load_demand.jl")
 include("src/api/renewables_potential.jl")
 include("src/api/model_uncertainties.jl")
+include("src/api/grid_availability.jl")
 include("src/api/model_optimize.jl")
 include("src/api/results.jl")
 
@@ -29,6 +30,7 @@ const ROUTES = Dict(
     "/load-demand" => load_demand_handler,
     "/renewables-potential" => renewables_potential_handler,
     "/model-uncertainties" => model_uncertainties_handler,
+    "/grid-availability" => grid_availability_handler,
     "/model-optimize" => model_optimize_handler,
 )
 
