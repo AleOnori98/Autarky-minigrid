@@ -3,19 +3,12 @@
   "type": "object",
   "required": ["project_id", "formulation", "grid_connected"],
   "properties": {
-    "project_id": {
-      "type": "string"
-    },
-
+    "project_id": { "type": "string" },
     "formulation": {
       "type": "string",
       "enum": ["linear", "expected_values", "icc", "jcc"]
     },
-
-    "grid_connected": {
-      "type": "boolean"
-    },
-
+    "grid_connected": { "type": "boolean" },
     "grid_outage_settings": {
       "type": "object",
       "properties": {
@@ -27,8 +20,7 @@
               "type": "array",
               "items": { "type": "number" }
             }
-          },
-          "additionalProperties": false
+          }
         },
         "avg_outages_per_year": {
           "type": "number",
@@ -41,7 +33,6 @@
       },
       "additionalProperties": false
     },
-
     "forecast_errors": {
       "type": "object",
       "patternProperties": {
@@ -53,36 +44,50 @@
               "type": "array",
               "items": { "type": "number" }
             }
-          },
-          "additionalProperties": false
+          }
         }
       }
     },
-
     "probabilistic_config": {
       "type": "object",
       "properties": {
-        "type": {
-          "type": "string",
-          "enum": ["ICC", "JCC"]
-        },
-        "outage_duration": {
-          "type": "number",
-          "minimum": 0
-        },
+        "type": { "type": "string", "enum": ["ICC", "JCC"] },
+        "outage_duration": { "type": "number", "minimum": 0 },
         "outage_probability": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
+          "type": "number", "minimum": 0, "maximum": 1
         },
         "islanding_probability": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 1
+          "type": "number", "minimum": 0, "maximum": 1
         }
       },
       "additionalProperties": false
     }
   },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "formulation": { "const": "linear" } }
+      },
+      "then": {
+        "required": ["project_id", "formulation", "grid_connected"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "formulation": { "enum": ["expected_values", "icc", "jcc"] } }
+      },
+      "then": {
+        "required": ["forecast_errors"]
+      }
+    },
+    {
+      "if": {
+        "properties": { "formulation": { "enum": ["icc", "jcc"] } }
+      },
+      "then": {
+        "required": ["probabilistic_config"]
+      }
+    }
+  ],
   "additionalProperties": false
 }

@@ -20,19 +20,6 @@ Supports:
 - Forecast error profiles (load and renewables)
 - Probabilistic config: ICC/JCC toggle and islanding probability
 
-# Example Input JSON:
-{
-  "project_id": "abc123",
-  "formulation": "linear",
-  "grid_connected": true,
-  "grid_outage_settings": {
-    "availability_matrix": {
-      "timestep": [...],
-      "winter": [...],
-      "summer": [...]
-    }
-  }
-}
 """
 function model_uncertainties_handler(req)
     return handle_post_request(
@@ -50,39 +37,48 @@ function model_uncertainties_handler(req)
 
             saved_files = String[]
 
+            # -------- LINEAR -----------------------
             if formulation == "linear"
-                if grid_connected && haskey(data[:grid_outage_settings], :availability_matrix)
-                    matrix = Dict(data[:grid_outage_settings][:availability_matrix])
-                    save_availability_matrix_csv(project_id, matrix)
-                    push!(saved_files, "projects/$project_id/time_series/grid_availability_matrix.csv")
+                if grid_connected && haskey(data, :grid_outage_settings)
+                    matrix_data = get(data[:grid_outage_settings], :availability_matrix, nothing)
+                    if matrix_data !== nothing
+                        save_availability_matrix_csv(project_id, Dict(matrix_data))
+                        push!(saved_files, "projects/$project_id/time_series/grid_availability_matrix.csv")
+                    end
+                    yaml_content["grid_outage_settings"] = true
                 end
 
+            # -------- EXPECTED VALUES --------------
             elseif formulation == "expected_values"
-                forecast_errors = data[:forecast_errors]
-                yaml_content["forecast_errors"] = Dict()
-
-                for (tech, errors) in forecast_errors
-                    save_forecast_error_csv(project_id, tech, errors)
-                    yaml_content["forecast_errors"][tech] = true
-                    push!(saved_files, "projects/$project_id/time_series/$(tech)_forecast_errors.csv")
+                if haskey(data, :forecast_errors)
+                    yaml_content["forecast_errors"] = Dict()
+                    for (tech, errors) in data[:forecast_errors]
+                        save_forecast_error_csv(project_id, tech, errors)
+                        yaml_content["forecast_errors"][tech] = true
+                        push!(saved_files, "projects/$project_id/time_series/$(tech)_forecast_errors.csv")
+                    end
                 end
 
-                if grid_connected
+                if grid_connected && haskey(data, :grid_outage_settings)
                     yaml_content["grid_outage_settings"] = data[:grid_outage_settings]
                 end
 
+            # -------- ICC / JCC ---------------------
             elseif formulation in ["icc", "jcc"]
-                forecast_errors = data[:forecast_errors]
-                yaml_content["forecast_errors"] = Dict()
-
-                for (tech, errors) in forecast_errors
-                    save_forecast_error_csv(project_id, tech, errors)
-                    yaml_content["forecast_errors"][tech] = true
-                    push!(saved_files, "projects/$project_id/time_series/$(tech)_forecast_errors.csv")
+                if haskey(data, :forecast_errors)
+                    yaml_content["forecast_errors"] = Dict()
+                    for (tech, errors) in data[:forecast_errors]
+                        save_forecast_error_csv(project_id, tech, errors)
+                        yaml_content["forecast_errors"][tech] = true
+                        push!(saved_files, "projects/$project_id/time_series/$(tech)_forecast_errors.csv")
+                    end
                 end
 
-                if grid_connected
+                if grid_connected && haskey(data, :grid_outage_settings)
                     yaml_content["grid_outage_settings"] = data[:grid_outage_settings]
+                end
+
+                if haskey(data, :probabilistic_config)
                     yaml_content["probabilistic_config"] = data[:probabilistic_config]
                 end
 
