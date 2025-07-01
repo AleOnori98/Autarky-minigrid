@@ -6,7 +6,7 @@ include("../schemas/schema_paths.jl")
 
 using .RequestHandlerUtils: handle_post_request
 using .YAMLSaver: save_solver_settings_yaml
-using .RunModel: run_model_async
+using .RunModel: run_model
 using .SchemaPaths: SCHEMA_PATHS
 
 
@@ -37,7 +37,7 @@ function model_optimize_handler(req::HTTP.Request)
             save_solver_settings_yaml(project_id, solver_name, Dict(solver_settings))
 
             # Run the model asynchronously
-            run_model_async(project_id, solver_name, Dict(solver_settings))
+            run_model(project_id, solver_name, Dict(solver_settings))
             return project_id
         end
     )

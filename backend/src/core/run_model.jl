@@ -2,7 +2,7 @@ module RunModel
 
 using Dates, JSON3, YAML
 
-export run_model_async
+export run_model
 
 # === Internal Helper: Timestamped log entry ===
 function log_line(io::IO, msg::AbstractString)
@@ -19,12 +19,12 @@ function write_status(project_dir::String, status::String)
 end
 
 """
-    run_model_async(project_id::String, solver::String, settings::Dict)
+    run_model(project_id::String, solver::String, settings::Dict)
 
 Launches the JuMP optimization model using the formulation
 defined in model_uncertainties.yaml. Logs activity and writes status.txt.
 """
-function run_model_async(project_id::String, solver::String, settings::Dict)
+function run_model(project_id::String, solver::String, settings::Dict)
     project_dir = joinpath("projects", project_id)
     @info "🟢 Starting run_model_async for project $project_id with solver $solver"
     @info "🟢 Settings: $settings"
