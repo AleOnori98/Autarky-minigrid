@@ -30,7 +30,8 @@ function write_results_to_json(
     has_generator = enabled["diesel_generator"]
     has_biogas = enabled["biogas_generator"]
     has_grid = enabled["grid_connection"]
-    allow_export = has_grid ? get(system_config["grid_connection"], "allow_export", false) : false
+    grid_params = tech_params["technology_parameters"]["grid_connection"]
+    allow_export = has_grid ? get(grid_params, "allow_export", false) : false
 
     project_settings = project_setup["project_settings"]
     project_lifetime = project_settings["time_horizon"]
