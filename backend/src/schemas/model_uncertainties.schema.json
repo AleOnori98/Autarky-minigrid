@@ -35,10 +35,12 @@
           "type": "object",
           "patternProperties": {
             ".*": {
-              "type": "array",
-              "items": {
-                "type": "array",
-                "items": { "type": "number" }
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                }
               }
             }
           }
@@ -48,10 +50,12 @@
           "type": "object",
           "patternProperties": {
             ".*": {
-              "type": "array",
-              "items": {
-                "type": "array",
-                "items": { "type": "number" }
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                }
               }
             }
           }
@@ -61,10 +65,12 @@
           "type": "object",
           "patternProperties": {
             ".*": {
-              "type": "array",
-              "items": {
-                "type": "array",
-                "items": { "type": "number" }
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                }
               }
             }
           }
@@ -74,10 +80,12 @@
           "type": "object",
           "patternProperties": {
             ".*": {
-              "type": "array",
-              "items": {
-                "type": "array",
-                "items": { "type": "number" }
+              "type": "object",
+              "patternProperties": {
+                ".*": {
+                  "type": "array",
+                  "items": { "type": "number" }
+                }
               }
             }
           }

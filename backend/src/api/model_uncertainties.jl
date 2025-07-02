@@ -38,6 +38,8 @@ function model_uncertainties_handler(req)
             saved_files = String[]
 
             if formulation == "linear"
+                println("🟢 Handling linear formulation")
+
                 if grid_connected && haskey(data, :grid_outage_settings)
                     matrix_data = get(data[:grid_outage_settings], :availability_matrix, nothing)
                     if matrix_data !== nothing
@@ -48,19 +50,27 @@ function model_uncertainties_handler(req)
                 end
 
             elseif formulation in ["expected_values", "icc", "jcc"]
+                println("🟢 Handling $formulation formulation")
+
                 if haskey(data, :forecast_errors)
                     yaml_content["forecast_errors"] = Dict()
+
                     for tech in ["load", "solar_pv", "wind_turbine", "mini_hydro"]
-                        if get(data[:forecast_errors], Symbol(tech), false) == true
+                        tech_sym = Symbol(tech)
+                        if get(data[:forecast_errors], tech_sym, false) == true
+
                             yaml_content["forecast_errors"][tech] = true
-                            # Check for the nested _errors block
+
                             errors_key = Symbol(tech * "_errors")
                             if haskey(data[:forecast_errors], errors_key)
                                 errors_by_season = data[:forecast_errors][errors_key]
+
                                 for (season, matrix) in errors_by_season
+
                                     save_forecast_error_csv(
-                                        project_id, tech, season, matrix
+                                        project_id, tech, String(season), matrix
                                     )
+
                                     push!(saved_files, "projects/$project_id/forecast_errors/$(tech)_errors_$(season).csv")
                                 end
                             else
@@ -68,6 +78,8 @@ function model_uncertainties_handler(req)
                             end
                         end
                     end
+                else
+                    println("⚠️ No forecast_errors found")
                 end
 
                 if haskey(data, :probabilistic_config)

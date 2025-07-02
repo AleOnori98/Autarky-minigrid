@@ -1,6 +1,6 @@
 module CSVWriter
 
-using CSV, DataFrames
+using CSV, DataFrames, JSON3
 
 export save_load_demand_csv, save_renewables_potential_csv,
        save_grid_cost_csv, save_grid_price_csv,
@@ -66,50 +66,35 @@ function save_grid_price_csv(project_id::String, prices_data::Dict)
     @info "✅ Saved grid prices data for project ID $project_id at $filepath"
 end
 
-"""
-    save_forecast_error_csv(
-        project_id::String,
-        technology::String,
-        season::String,
-        matrix
-    )
 
-Save a multi-season multi-realization forecast error block.
-
-- `matrix` is expected to be a nested JSON3.Array or Array of Arrays.
-- Saves a CSV file under:
-  projects/{project_id}/forecast_errors/{technology}_errors_{season}.csv
 """
-function save_forecast_error_csv(
-    project_id::String,
-    technology::String,
-    season::String,
-    matrix
-)
-    # === Unwrap the JSON3 Array to plain Julia arrays ===
-    if isa(matrix, AbstractVector)
-        plain_matrix = Vector{Any}(matrix)
-    else
-        error("Invalid matrix format: expected a vector of vectors")
+    save_forecast_error_csv(project_id::String, technology::String, season::String, matrix)
+
+Converts a forecast error matrix to CSV and stores it under:
+projects/{project_id}/forecast_errors/{technology}_errors_{season}.csv
+"""
+function save_forecast_error_csv(project_id::String, technology::String, season::String, matrix)
+
+    # Force convert JSON3.Object to Dict
+    if matrix isa JSON3.Object
+        matrix = Dict(matrix)
     end
 
-    # Ensure each row is plain:
-    plain_rows = [Vector(row) for row in plain_matrix]
+    if isa(matrix, Dict)
+        df = DataFrame(matrix)
+    elseif isa(matrix, AbstractVector)
+        plain_rows = [collect(row) for row in matrix]
+        df = DataFrame(plain_rows)
+    else
+        error("Unsupported forecast error format: $(typeof(matrix))")
+    end
 
-    # Convert rows to DataFrame with generic col names
-    df = DataFrame(plain_rows)
-
-    # Ensure output folder exists
     folder = joinpath("projects", project_id, "forecast_errors")
     isdir(folder) || mkpath(folder)
-
-    # Compose the output path
     filepath = joinpath(folder, "$(technology)_errors_$(season).csv")
-
-    # Write CSV
     CSV.write(filepath, df)
 
-    @info "✅ Saved forecast errors for $technology ($season) at $filepath"
+    println("✅ Saved forecast errors for $technology ($season) at $filepath")
 end
 
 
