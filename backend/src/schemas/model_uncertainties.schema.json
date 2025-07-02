@@ -22,27 +22,63 @@
             }
           }
         },
-        "avg_outages_per_year": {
-          "type": "number",
-          "minimum": 0
-        },
-        "avg_outage_duration": {
-          "type": "number",
-          "minimum": 0
-        }
+        "avg_outages_per_year": { "type": "number", "minimum": 0 },
+        "avg_outage_duration": { "type": "number", "minimum": 0 }
       },
       "additionalProperties": false
     },
     "forecast_errors": {
       "type": "object",
-      "patternProperties": {
-        "^(load|solar_pv|wind_turbine|mini_hydro)$": {
+      "properties": {
+        "load": { "type": "boolean" },
+        "load_errors": {
           "type": "object",
-          "minProperties": 1,
           "patternProperties": {
             ".*": {
               "type": "array",
-              "items": { "type": "number" }
+              "items": {
+                "type": "array",
+                "items": { "type": "number" }
+              }
+            }
+          }
+        },
+        "solar_pv": { "type": "boolean" },
+        "solar_pv_errors": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": { "type": "number" }
+              }
+            }
+          }
+        },
+        "wind_turbine": { "type": "boolean" },
+        "wind_turbine_errors": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": { "type": "number" }
+              }
+            }
+          }
+        },
+        "mini_hydro": { "type": "boolean" },
+        "mini_hydro_errors": {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "array",
+              "items": {
+                "type": "array",
+                "items": { "type": "number" }
+              }
             }
           }
         }
@@ -51,41 +87,30 @@
     "probabilistic_config": {
       "type": "object",
       "properties": {
-        "type": { "type": "string", "enum": ["ICC", "JCC"] },
         "outage_duration": { "type": "number", "minimum": 0 },
-        "outage_probability": {
-          "type": "number", "minimum": 0, "maximum": 1
-        },
-        "islanding_probability": {
-          "type": "number", "minimum": 0, "maximum": 1
-        }
+        "outage_probability": { "type": "number", "minimum": 0, "maximum": 1 },
+        "islanding_probability": { "type": "number", "minimum": 0, "maximum": 1 }
       },
       "additionalProperties": false
     }
   },
   "allOf": [
     {
-      "if": {
-        "properties": { "formulation": { "const": "linear" } }
-      },
+      "if": { "properties": { "formulation": { "const": "linear" } } },
       "then": {
         "required": ["project_id", "formulation", "grid_connected"]
       }
     },
     {
-      "if": {
-        "properties": { "formulation": { "enum": ["expected_values", "icc", "jcc"] } }
-      },
+      "if": { "properties": { "formulation": { "enum": ["expected_values"] } } },
       "then": {
         "required": ["forecast_errors"]
       }
     },
     {
-      "if": {
-        "properties": { "formulation": { "enum": ["icc", "jcc"] } }
-      },
+      "if": { "properties": { "formulation": { "enum": ["icc", "jcc"] } } },
       "then": {
-        "required": ["probabilistic_config"]
+        "required": ["forecast_errors", "probabilistic_config"]
       }
     }
   ],
