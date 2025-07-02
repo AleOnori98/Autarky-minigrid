@@ -67,19 +67,51 @@ function save_grid_price_csv(project_id::String, prices_data::Dict)
 end
 
 """
-    save_forecast_error_csv(project_id::String, technology::String, errors::Dict)
+    save_forecast_error_csv(
+        project_id::String,
+        technology::String,
+        season::String,
+        matrix
+    )
 
-Converts a forecast error dictionary to CSV and stores it under:
-projects/{project_id}/time_series/{technology}_forecast_errors.csv
+Save a multi-season multi-realization forecast error block.
+
+- `matrix` is expected to be a nested JSON3.Array or Array of Arrays.
+- Saves a CSV file under:
+  projects/{project_id}/forecast_errors/{technology}_errors_{season}.csv
 """
-function save_forecast_error_csv(project_id::String, technology::String, errors::Dict)
-    df = DataFrame(errors)
-    folder = joinpath("projects", project_id, "time_series")
+function save_forecast_error_csv(
+    project_id::String,
+    technology::String,
+    season::String,
+    matrix
+)
+    # === Unwrap the JSON3 Array to plain Julia arrays ===
+    if isa(matrix, AbstractVector)
+        plain_matrix = Vector{Any}(matrix)
+    else
+        error("Invalid matrix format: expected a vector of vectors")
+    end
+
+    # Ensure each row is plain:
+    plain_rows = [Vector(row) for row in plain_matrix]
+
+    # Convert rows to DataFrame with generic col names
+    df = DataFrame(plain_rows)
+
+    # Ensure output folder exists
+    folder = joinpath("projects", project_id, "forecast_errors")
     isdir(folder) || mkpath(folder)
-    filepath = joinpath(folder, "$(technology)_forecast_errors.csv")
+
+    # Compose the output path
+    filepath = joinpath(folder, "$(technology)_errors_$(season).csv")
+
+    # Write CSV
     CSV.write(filepath, df)
-    @info "✅ Saved forecast errors for $technology in project ID $project_id at $filepath"
+
+    @info "✅ Saved forecast errors for $technology ($season) at $filepath"
 end
+
 
 """
     save_availability_matrix_csv(project_id::String, matrix::Dict)

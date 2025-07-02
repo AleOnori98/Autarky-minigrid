@@ -37,7 +37,6 @@ function model_uncertainties_handler(req)
 
             saved_files = String[]
 
-            # -------- LINEAR -----------------------
             if formulation == "linear"
                 if grid_connected && haskey(data, :grid_outage_settings)
                     matrix_data = get(data[:grid_outage_settings], :availability_matrix, nothing)
@@ -48,34 +47,27 @@ function model_uncertainties_handler(req)
                     yaml_content["grid_outage_settings"] = true
                 end
 
-            # -------- EXPECTED VALUES --------------
-            elseif formulation == "expected_values"
+            elseif formulation in ["expected_values", "icc", "jcc"]
                 if haskey(data, :forecast_errors)
                     yaml_content["forecast_errors"] = Dict()
-                    for (tech, errors) in data[:forecast_errors]
-                        save_forecast_error_csv(project_id, tech, errors)
-                        yaml_content["forecast_errors"][tech] = true
-                        push!(saved_files, "projects/$project_id/time_series/$(tech)_forecast_errors.csv")
+                    for tech in ["load", "solar_pv", "wind_turbine", "mini_hydro"]
+                        if get(data[:forecast_errors], Symbol(tech), false) == true
+                            yaml_content["forecast_errors"][tech] = true
+                            # Check for the nested _errors block
+                            errors_key = Symbol(tech * "_errors")
+                            if haskey(data[:forecast_errors], errors_key)
+                                errors_by_season = data[:forecast_errors][errors_key]
+                                for (season, matrix) in errors_by_season
+                                    save_forecast_error_csv(
+                                        project_id, tech, season, matrix
+                                    )
+                                    push!(saved_files, "projects/$project_id/forecast_errors/$(tech)_errors_$(season).csv")
+                                end
+                            else
+                                error("Missing forecast errors block for $tech!")
+                            end
+                        end
                     end
-                end
-
-                if grid_connected && haskey(data, :grid_outage_settings)
-                    yaml_content["grid_outage_settings"] = data[:grid_outage_settings]
-                end
-
-            # -------- ICC / JCC ---------------------
-            elseif formulation in ["icc", "jcc"]
-                if haskey(data, :forecast_errors)
-                    yaml_content["forecast_errors"] = Dict()
-                    for (tech, errors) in data[:forecast_errors]
-                        save_forecast_error_csv(project_id, tech, errors)
-                        yaml_content["forecast_errors"][tech] = true
-                        push!(saved_files, "projects/$project_id/time_series/$(tech)_forecast_errors.csv")
-                    end
-                end
-
-                if grid_connected && haskey(data, :grid_outage_settings)
-                    yaml_content["grid_outage_settings"] = data[:grid_outage_settings]
                 end
 
                 if haskey(data, :probabilistic_config)
