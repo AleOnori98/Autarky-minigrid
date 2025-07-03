@@ -60,7 +60,7 @@ end
 println("  Discounted Salvage Value: ", round(value(model[:Salvage_npv]) / 1000, digits=2), " k$currency")
 
 actualized_demand = sum(sum(season_weights[s] * load[t, s] for t in 1:T, s in 1:S) * discount_factor[y] for y in 1:project_lifetime)
-lcoe = value(model[:NPC]) / actualized_demand
+lcoe = (value(model[:NPC]) / actualized_demand)* 0.1
 println("  Levelized Cost of Energy (LCOE): ", round(lcoe, digits=2), " $currency/kWh")
 
 println("\nOptimal Operation:")
