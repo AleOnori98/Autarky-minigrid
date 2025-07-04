@@ -71,7 +71,7 @@ function write_results_to_json(
 
     # === LCOE
     demand_sum = sum(sum(season_weights[s] * load[t, s] for t in 1:T, s in 1:num_seasons) * discount_factors[y] for y in 1:project_lifetime)
-    results["LCOE[USD/kWh]"] = round(safe_value(model, :NPC) / demand_sum, digits=3)
+    results["LCOE[USD/kWh]"] = round(safe_value(model, :NPC) / demand_sum, digits=3) * 0.1
 
     # === Operation KPIs
     op = Dict(
